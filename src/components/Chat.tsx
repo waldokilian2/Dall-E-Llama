@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot } from "lucide-react";
 import Message from "./Message";
-import { showError } => "@/utils/toast";
+import { showError } from "@/utils/toast"; // Corrected this line
 import { ThemeToggle } from "./ThemeToggle"; // Import the new ThemeToggle component
 
 interface ChatMessage {
