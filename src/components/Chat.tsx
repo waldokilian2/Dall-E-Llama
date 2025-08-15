@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot } from "lucide-react";
 import Message from "./Message";
-import { showError } from "@/utils/toast"; // Corrected this line
-import { ThemeToggle } from "./ThemeToggle"; // Import the new ThemeToggle component
+import { showError } from "@/utils/toast";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -83,12 +83,14 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-transparent"> {/* Removed background color, height is now controlled by parent */}
+    <div className="flex flex-col h-full bg-transparent">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-transparent rounded-t-xl"> {/* Adjusted border and background */}
+      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-transparent rounded-t-xl">
         <div className="flex items-center space-x-2">
-          <Bot className="h-6 w-6 text-purple-400" /> {/* Changed icon color to purple */}
-          <h1 className="text-xl font-semibold text-foreground">Dall-E Llama: The Swiss Army knife for dev</h1> {/* Text color for contrast */}
+          <Bot className="h-6 w-6 text-purple-400" />
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+            Dall-E Llama: The Swiss Army knife for dev
+          </h1>
         </div>
         <ThemeToggle />
       </div>
@@ -98,7 +100,7 @@ const Chat: React.FC = () => {
         <ScrollArea className="h-full w-full pr-4">
           <div className="flex flex-col space-y-2">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground mt-10"> {/* Lighter text for dark background */}
+              <div className="text-center text-muted-foreground mt-10">
                 Start a conversation with your AI agent!
               </div>
             )}
@@ -107,7 +109,7 @@ const Chat: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[70%] p-3 rounded-lg shadow-md bg-gray-700/30 text-foreground rounded-bl-none animate-pulse border border-gray-600/50"> {/* Adjusted bg and border for typing indicator */}
+                <div className="max-w-[70%] p-3 rounded-lg shadow-md bg-gray-700/30 text-foreground rounded-bl-none animate-pulse border border-gray-600/50">
                   Typing...
                 </div>
               </div>
@@ -117,16 +119,16 @@ const Chat: React.FC = () => {
         </ScrollArea>
       </div>
       {/* Input Area */}
-      <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl"> {/* Adjusted border and background */}
+      <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl">
         <Input
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={isLoading}
-          className="flex-1 bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500" // Input specific styling for glass effect
+          className="flex-1 bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500"
         />
-        <Button onClick={handleSendMessage} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700 text-white"> {/* Purple button */}
+        <Button onClick={handleSendMessage} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700 text-white">
           <Send className="h-5 w-5" />
           <span className="sr-only">Send message</span>
         </Button>
