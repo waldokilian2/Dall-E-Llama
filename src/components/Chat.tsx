@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain, Settings, Paperclip, XCircle } from "lucide-react"; // Added Settings, Paperclip, XCircle icons
+import { Send, Brain, Settings, Paperclip, XCircle } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
@@ -16,6 +16,7 @@ interface ChatMessage {
 // Default N8N Webhook URL
 const DEFAULT_N8N_WEBHOOK_URL = "http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat";
 const DEFAULT_FILE_UPLOAD_ENABLED = false;
+const DEFAULT_RESPONSE_TIMEOUT_SECONDS = 120; // 2 minutes
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -28,12 +29,14 @@ const Chat: React.FC = () => {
   const [fileUploadEnabled, setFileUploadEnabled] = useState<boolean>(
     localStorage.getItem("fileUploadEnabled") === "true" || DEFAULT_FILE_UPLOAD_ENABLED
   );
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // State for selected file
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for file input
+  const [responseTimeoutSeconds, setResponseTimeoutSeconds] = useState<number>(
+    parseInt(localStorage.getItem("responseTimeoutSeconds") || String(DEFAULT_RESPONSE_TIMEOUT_SECONDS), 10)
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Generate a simple session ID once per component mount
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
   const scrollToBottom = () => {
@@ -44,11 +47,13 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSaveSettings = (newUrl: string, newFileUploadEnabled: boolean) => {
+  const handleSaveSettings = (newUrl: string, newFileUploadEnabled: boolean, newResponseTimeout: number) => {
     setN8nWebhookUrl(newUrl);
     localStorage.setItem("n8nWebhookUrl", newUrl);
     setFileUploadEnabled(newFileUploadEnabled);
     localStorage.setItem("fileUploadEnabled", String(newFileUploadEnabled));
+    setResponseTimeoutSeconds(newResponseTimeout);
+    localStorage.setItem("responseTimeoutSeconds", String(newResponseTimeout));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +72,7 @@ const Chat: React.FC = () => {
   const handleRemoveFile = () => {
     setSelectedFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Clear the file input
+      fileInputRef.current.value = "";
     }
   };
 
@@ -94,10 +99,8 @@ const Chat: React.FC = () => {
           setIsLoading(false);
         };
         reader.readAsText(selectedFile);
-        // Return here to wait for FileReader to complete
         return;
       } else {
-        // For PDF/DOCX, we only send metadata for simplicity on client-side
         showError(`Note: For ${fileType} files, only the file name will be sent. Full content parsing is typically done server-side.`);
       }
     }
@@ -112,11 +115,14 @@ const Chat: React.FC = () => {
     };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput("");
-    setSelectedFile(null); // Clear selected file after sending
+    setSelectedFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Clear the file input
+      fileInputRef.current.value = "";
     }
     setIsLoading(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000); // Convert seconds to milliseconds
 
     try {
       const payload: any = {
@@ -129,7 +135,7 @@ const Chat: React.FC = () => {
         payload.file = {
           name: fileName,
           type: fileType,
-          content: fileContent, // Will be undefined for non-txt files
+          content: fileContent,
         };
       }
 
@@ -139,7 +145,10 @@ const Chat: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        signal: controller.signal, // Attach the abort signal
       });
+
+      clearTimeout(timeoutId); // Clear the timeout if the fetch completes
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -150,13 +159,23 @@ const Chat: React.FC = () => {
 
       const aiMessage: ChatMessage = { sender: "ai", text: data?.output || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      showError("Failed to get a response from the AI agent. Please try again.");
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
-      ]);
+    } catch (error: any) {
+      clearTimeout(timeoutId); // Ensure timeout is cleared even on error
+      if (error.name === 'AbortError') {
+        console.error("Request timed out:", error);
+        showError(`Request timed out after ${responseTimeoutSeconds} seconds. Please try again or increase the timeout in settings.`);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { sender: "ai", text: "Sorry, the request timed out." },
+        ]);
+      } else {
+        console.error("Error sending message:", error);
+        showError("Failed to get a response from the AI agent. Please try again.");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
+        ]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +262,7 @@ const Chat: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
-            className="w-full bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500 pr-10" // Added pr-10 for file indicator
+            className="w-full bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500 pr-10"
           />
           {selectedFile && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1 text-sm text-muted-foreground bg-background/50 rounded-full px-2 py-1">
@@ -271,6 +290,7 @@ const Chat: React.FC = () => {
         onOpenChange={setIsSettingsOpen}
         currentUrl={n8nWebhookUrl}
         currentFileUploadEnabled={fileUploadEnabled}
+        currentResponseTimeout={responseTimeoutSeconds}
         onSave={handleSaveSettings}
       />
     </div>
