@@ -58,9 +58,10 @@ const Chat: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log("Webhook response data:", data); // Added console log here
+      console.log("Webhook response data:", data); // Keep this log for further debugging if needed
 
-      const aiMessage: ChatMessage = { sender: "ai", text: data[0]?.output || "No response from AI." };
+      // Corrected to access data.output directly
+      const aiMessage: ChatMessage = { sender: "ai", text: data?.output || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -76,6 +77,7 @@ const Chat: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !isLoading) {
+      e.preventDefault(); // Prevent default form submission behavior
       handleSendMessage();
     }
   };
