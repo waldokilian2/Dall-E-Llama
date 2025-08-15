@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send } from "lucide-react";
+import { Send, Bot } from "lucide-react"; // Import Bot icon
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 
@@ -71,6 +71,15 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800">
+        <div className="flex items-center space-x-2">
+          <Bot className="h-6 w-6 text-blue-500" />
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI Chat Agent</h1>
+        </div>
+      </div>
+
+      {/* Message Area */}
       <div className="flex-1 p-4 overflow-hidden">
         <ScrollArea className="h-full w-full pr-4">
           <div className="flex flex-col space-y-2">
@@ -93,6 +102,7 @@ const Chat: React.FC = () => {
           </div>
         </ScrollArea>
       </div>
+      {/* Input Area */}
       <div className="p-4 border-t bg-white dark:bg-gray-800 flex items-center space-x-2">
         <Input
           placeholder="Type your message..."
