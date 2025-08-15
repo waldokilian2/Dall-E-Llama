@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot } from "lucide-react";
+import { Send, Brain } from "lucide-react"; // Changed Bot to Brain
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
@@ -87,9 +87,9 @@ const Chat: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-transparent rounded-t-xl">
         <div className="flex items-center space-x-2">
-          <Bot className="h-6 w-6 text-purple-400" />
+          <Brain className="h-6 w-6 text-purple-400" /> {/* Changed Bot to Brain */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
-            Dall-E Llama: The Swiss Army knife for dev
+            Dall-E Llama
           </h1>
         </div>
         <ThemeToggle />
