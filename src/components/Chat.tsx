@@ -58,7 +58,8 @@ const Chat: React.FC = () => {
       }
 
       const data = await response.json();
-      const aiMessage: ChatMessage = { sender: "ai", text: data.response || "No response from AI." };
+      // Adjusted to correctly parse the n8n response format
+      const aiMessage: ChatMessage = { sender: "ai", text: data[0]?.output || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
