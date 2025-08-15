@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain } from "lucide-react"; // Changed Bot to Brain
+import { Send, Brain } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
@@ -85,14 +85,18 @@ const Chat: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-transparent">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-transparent rounded-t-xl">
-        <div className="flex items-center space-x-2">
-          <Brain className="h-6 w-6 text-purple-400" /> {/* Changed Bot to Brain */}
+      <div className="flex items-center p-4 border-b border-white/10 bg-transparent rounded-t-xl relative">
+        {/* Centered Title and Icon */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
+          <Brain className="h-10 w-10 text-purple-400" /> {/* Increased size */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
         </div>
-        <ThemeToggle />
+        {/* Theme Toggle (aligned to the right) */}
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Message Area */}
