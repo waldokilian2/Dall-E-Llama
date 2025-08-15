@@ -10,27 +10,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch"; // Import Switch
 import { useToast } from "@/hooks/use-toast";
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentUrl: string;
-  onSave: (newUrl: string) => void;
+  currentFileUploadEnabled: boolean; // New prop for file upload state
+  onSave: (newUrl: string, newFileUploadEnabled: boolean) => void; // Updated onSave signature
 }
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
   open,
   onOpenChange,
   currentUrl,
+  currentFileUploadEnabled,
   onSave,
 }) => {
   const [urlInput, setUrlInput] = useState(currentUrl);
+  const [fileUploadEnabled, setFileUploadEnabled] = useState(currentFileUploadEnabled); // State for toggle
   const { toast } = useToast();
 
   useEffect(() => {
     setUrlInput(currentUrl);
-  }, [currentUrl, open]); // Sync input with currentUrl when dialog opens
+    setFileUploadEnabled(currentFileUploadEnabled);
+  }, [currentUrl, currentFileUploadEnabled, open]); // Sync input and toggle with props when dialog opens
 
   const handleSave = () => {
     if (urlInput.trim() === "") {
@@ -41,11 +46,11 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       });
       return;
     }
-    onSave(urlInput);
+    onSave(urlInput, fileUploadEnabled); // Pass both settings
     onOpenChange(false);
     toast({
       title: "Success",
-      description: "N8N Webhook URL saved successfully.",
+      description: "Settings saved successfully.",
     });
   };
 
@@ -55,7 +60,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Configure your N8N Webhook URL here.
+            Configure your N8N Webhook URL and other preferences.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -68,6 +73,17 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               className="col-span-3 bg-input text-foreground border-border"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="file-upload-toggle" className="text-right">
+              Enable File Upload
+            </Label>
+            <Switch
+              id="file-upload-toggle"
+              checked={fileUploadEnabled}
+              onCheckedChange={setFileUploadEnabled}
+              className="col-span-3"
             />
           </div>
         </div>

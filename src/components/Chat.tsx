@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain, Settings } from "lucide-react"; // Added Settings icon
+import { Send, Brain, Settings, Paperclip, XCircle } from "lucide-react"; // Added Settings, Paperclip, XCircle icons
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
-import SettingsDialog from "./SettingsDialog"; // Import the new component
+import SettingsDialog from "./SettingsDialog";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -15,6 +15,7 @@ interface ChatMessage {
 
 // Default N8N Webhook URL
 const DEFAULT_N8N_WEBHOOK_URL = "http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat";
+const DEFAULT_FILE_UPLOAD_ENABLED = false;
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -24,6 +25,12 @@ const Chat: React.FC = () => {
     localStorage.getItem("n8nWebhookUrl") || DEFAULT_N8N_WEBHOOK_URL
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [fileUploadEnabled, setFileUploadEnabled] = useState<boolean>(
+    localStorage.getItem("fileUploadEnabled") === "true" || DEFAULT_FILE_UPLOAD_ENABLED
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // State for selected file
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for file input
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Generate a simple session ID once per component mount
@@ -37,27 +44,96 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSaveN8nUrl = (newUrl: string) => {
+  const handleSaveSettings = (newUrl: string, newFileUploadEnabled: boolean) => {
     setN8nWebhookUrl(newUrl);
     localStorage.setItem("n8nWebhookUrl", newUrl);
+    setFileUploadEnabled(newFileUploadEnabled);
+    localStorage.setItem("fileUploadEnabled", String(newFileUploadEnabled));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const allowedTypes = ["text/plain", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (allowedTypes.includes(file.type)) {
+        setSelectedFile(file);
+      } else {
+        showError("Unsupported file type. Please upload .txt, .pdf, .doc, or .docx files.");
+        setSelectedFile(null);
+      }
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input
+    }
   };
 
   const handleSendMessage = async () => {
-    if (input.trim() === "") return;
+    if (input.trim() === "" && !selectedFile) return;
 
-    const userMessage: ChatMessage = { sender: "user", text: input.trim() };
+    const userMessageText = input.trim();
+    let fileContent: string | undefined = undefined;
+    let fileName: string | undefined = undefined;
+    let fileType: string | undefined = undefined;
+
+    if (selectedFile) {
+      fileName = selectedFile.name;
+      fileType = selectedFile.type;
+
+      if (selectedFile.type === "text/plain") {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          fileContent = e.target?.result as string;
+          await sendPayload(userMessageText, fileContent, fileName, fileType);
+        };
+        reader.onerror = () => {
+          showError("Failed to read text file.");
+          setIsLoading(false);
+        };
+        reader.readAsText(selectedFile);
+        // Return here to wait for FileReader to complete
+        return;
+      } else {
+        // For PDF/DOCX, we only send metadata for simplicity on client-side
+        showError(`Note: For ${fileType} files, only the file name will be sent. Full content parsing is typically done server-side.`);
+      }
+    }
+
+    await sendPayload(userMessageText, fileContent, fileName, fileType);
+  };
+
+  const sendPayload = async (chatInput: string, fileContent?: string, fileName?: string, fileType?: string) => {
+    const userMessage: ChatMessage = {
+      sender: "user",
+      text: chatInput + (fileName ? ` (Attached: ${fileName})` : ""),
+    };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput("");
+    setSelectedFile(null); // Clear selected file after sending
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input
+    }
     setIsLoading(true);
 
     try {
-      const payload = {
+      const payload: any = {
         sessionId: sessionId,
         action: "sendMessage",
-        chatInput: userMessage.text,
+        chatInput: chatInput,
       };
 
-      const response = await fetch(n8nWebhookUrl, { // Use the state variable here
+      if (fileName) {
+        payload.file = {
+          name: fileName,
+          type: fileType,
+          content: fileContent, // Will be undefined for non-txt files
+        };
+      }
+
+      const response = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,15 +215,52 @@ const Chat: React.FC = () => {
       </div>
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl">
-        <Input
-          placeholder="Type your message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={isLoading}
-          className="flex-1 bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500"
-        />
-        <Button onClick={handleSendMessage} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700 text-white">
+        {fileUploadEnabled && (
+          <>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".txt,.pdf,.doc,.docx"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Paperclip className="h-5 w-5" />
+              <span className="sr-only">Attach file</span>
+            </Button>
+          </>
+        )}
+        <div className="flex-1 relative">
+          <Input
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="w-full bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500 pr-10" // Added pr-10 for file indicator
+          />
+          {selectedFile && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1 text-sm text-muted-foreground bg-background/50 rounded-full px-2 py-1">
+              <span>{selectedFile.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRemoveFile}
+                className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+              >
+                <XCircle className="h-4 w-4" />
+                <span className="sr-only">Remove file</span>
+              </Button>
+            </div>
+          )}
+        </div>
+        <Button onClick={handleSendMessage} disabled={isLoading || (input.trim() === "" && !selectedFile)} className="bg-purple-600 hover:bg-purple-700 text-white">
           <Send className="h-5 w-5" />
           <span className="sr-only">Send message</span>
         </Button>
@@ -157,7 +270,8 @@ const Chat: React.FC = () => {
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
         currentUrl={n8nWebhookUrl}
-        onSave={handleSaveN8nUrl}
+        currentFileUploadEnabled={fileUploadEnabled}
+        onSave={handleSaveSettings}
       />
     </div>
   );
