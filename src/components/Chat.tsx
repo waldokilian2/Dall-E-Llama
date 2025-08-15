@@ -2,22 +2,28 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain } from "lucide-react";
+import { Send, Brain, Settings } from "lucide-react"; // Added Settings icon
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
+import SettingsDialog from "./SettingsDialog"; // Import the new component
 
 interface ChatMessage {
   sender: "user" | "ai";
   text: string;
 }
 
-const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat";
+// Default N8N Webhook URL
+const DEFAULT_N8N_WEBHOOK_URL = "http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat";
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState<string>(
+    localStorage.getItem("n8nWebhookUrl") || DEFAULT_N8N_WEBHOOK_URL
+  );
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Generate a simple session ID once per component mount
@@ -30,6 +36,11 @@ const Chat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleSaveN8nUrl = (newUrl: string) => {
+    setN8nWebhookUrl(newUrl);
+    localStorage.setItem("n8nWebhookUrl", newUrl);
+  };
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
@@ -46,7 +57,7 @@ const Chat: React.FC = () => {
         chatInput: userMessage.text,
       };
 
-      const response = await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(n8nWebhookUrl, { // Use the state variable here
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,13 +99,17 @@ const Chat: React.FC = () => {
       <div className="flex items-center p-4 border-b border-white/10 bg-transparent rounded-t-xl relative">
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
-          <Brain className="h-10 w-10 text-purple-400" /> {/* Increased size */}
+          <Brain className="h-10 w-10 text-purple-400" />
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
         </div>
-        {/* Theme Toggle (aligned to the right) */}
-        <div className="ml-auto">
+        {/* Right-aligned controls */}
+        <div className="ml-auto flex items-center space-x-2">
+          <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
+            <Settings className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Settings</span>
+          </Button>
           <ThemeToggle />
         </div>
       </div>
@@ -137,6 +152,13 @@ const Chat: React.FC = () => {
           <span className="sr-only">Send message</span>
         </Button>
       </div>
+
+      <SettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        currentUrl={n8nWebhookUrl}
+        onSave={handleSaveN8nUrl}
+      />
     </div>
   );
 };
