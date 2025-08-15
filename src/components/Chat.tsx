@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
+import { ThemeToggle } from "./ThemeToggle"; // Import the new ThemeToggle component
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -58,9 +59,8 @@ const Chat: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log("Webhook response data:", data); // Keep this log for further debugging if needed
+      console.log("Webhook response data:", data);
 
-      // Corrected to access data.output directly
       const aiMessage: ChatMessage = { sender: "ai", text: data?.output || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
@@ -77,7 +77,7 @@ const Chat: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !isLoading) {
-      e.preventDefault(); // Prevent default form submission behavior
+      e.preventDefault();
       handleSendMessage();
     }
   };
@@ -88,8 +88,9 @@ const Chat: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800">
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6 text-blue-500" />
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI Chat Agent</h1>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Dall-E Llama: The Swiss Army knife for dev</h1>
         </div>
+        <ThemeToggle /> {/* Add the theme toggle here */}
       </div>
 
       {/* Message Area */}
