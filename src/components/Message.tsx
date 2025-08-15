@@ -16,10 +16,11 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
     >
       <div
         className={cn(
-          "max-w-[70%] p-3 rounded-lg shadow-md",
+          "max-w-[70%] p-3 rounded-lg shadow-lg", // Increased shadow for more depth
+          "backdrop-filter backdrop-blur-lg bg-opacity-20", // Glass effect
           sender === "user"
-            ? "bg-blue-500 text-white rounded-br-none"
-            : "bg-gray-200 text-gray-800 rounded-bl-none dark:bg-gray-700 dark:text-gray-100",
+            ? "bg-purple-600/30 text-white rounded-br-none border border-purple-500/50" // User message: purple-ish glass
+            : "bg-gray-700/30 text-gray-100 rounded-bl-none border border-gray-600/50", // AI message: neutral glass
         )}
       >
         {text}

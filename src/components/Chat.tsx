@@ -83,14 +83,14 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-transparent"> {/* Removed background color, height is now controlled by parent */}
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-transparent rounded-t-xl"> {/* Adjusted border and background */}
         <div className="flex items-center space-x-2">
-          <Bot className="h-6 w-6 text-blue-500" />
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Dall-E Llama: The Swiss Army knife for dev</h1>
+          <Bot className="h-6 w-6 text-purple-400" /> {/* Changed icon color to purple */}
+          <h1 className="text-xl font-semibold text-white">Dall-E Llama: The Swiss Army knife for dev</h1> {/* Text color for contrast */}
         </div>
-        <ThemeToggle /> {/* Add the theme toggle here */}
+        <ThemeToggle />
       </div>
 
       {/* Message Area */}
@@ -98,7 +98,7 @@ const Chat: React.FC = () => {
         <ScrollArea className="h-full w-full pr-4">
           <div className="flex flex-col space-y-2">
             {messages.length === 0 && (
-              <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
+              <div className="text-center text-gray-300 mt-10"> {/* Lighter text for dark background */}
                 Start a conversation with your AI agent!
               </div>
             )}
@@ -107,7 +107,7 @@ const Chat: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[70%] p-3 rounded-lg shadow-md bg-gray-200 text-gray-800 rounded-bl-none dark:bg-gray-700 dark:text-gray-100 animate-pulse">
+                <div className="max-w-[70%] p-3 rounded-lg shadow-md bg-gray-700/30 text-gray-100 rounded-bl-none animate-pulse border border-gray-600/50"> {/* Adjusted bg and border for typing indicator */}
                   Typing...
                 </div>
               </div>
@@ -117,16 +117,16 @@ const Chat: React.FC = () => {
         </ScrollArea>
       </div>
       {/* Input Area */}
-      <div className="p-4 border-t bg-white dark:bg-gray-800 flex items-center space-x-2">
+      <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl"> {/* Adjusted border and background */}
         <Input
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={isLoading}
-          className="flex-1"
+          className="flex-1 bg-white/10 text-white border-white/20 placeholder:text-gray-300 focus-visible:ring-offset-transparent focus-visible:ring-purple-500" // Input specific styling for glass effect
         />
-        <Button onClick={handleSendMessage} disabled={isLoading}>
+        <Button onClick={handleSendMessage} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700 text-white"> {/* Purple button */}
           <Send className="h-5 w-5" />
           <span className="sr-only">Send message</span>
         </Button>
