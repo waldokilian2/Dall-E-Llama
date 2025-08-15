@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot } from "lucide-react"; // Import Bot icon
+import { Send, Bot } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 
@@ -18,6 +18,9 @@ const Chat: React.FC = () => {
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Generate a simple session ID once per component mount
+  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,12 +39,18 @@ const Chat: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const payload = {
+        sessionId: sessionId,
+        action: "sendMessage",
+        chatInput: userMessage.text,
+      };
+
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userMessage.text }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
