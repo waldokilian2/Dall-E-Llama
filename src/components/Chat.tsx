@@ -7,6 +7,7 @@ import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./SettingsDialog";
+import { Badge } from "@/components/ui/badge"; // Import Badge for chips
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -38,6 +39,9 @@ const Chat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+
+  // New state for current suggested actions, initialized with a default
+  const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -84,6 +88,9 @@ const Chat: React.FC = () => {
     let fileName: string | undefined = undefined;
     let fileType: string | undefined = undefined;
 
+    // Clear current suggested actions when user sends a message
+    setCurrentSuggestedActions([]);
+
     if (selectedFile) {
       fileName = selectedFile.name;
       fileType = selectedFile.type;
@@ -97,6 +104,8 @@ const Chat: React.FC = () => {
         reader.onerror = () => {
           showError("Failed to read text file.");
           setIsLoading(false);
+          // Re-add default suggestion on error
+          setCurrentSuggestedActions(["What can you do?"]);
         };
         reader.readAsText(selectedFile);
         return;
@@ -157,8 +166,16 @@ const Chat: React.FC = () => {
       const data = await response.json();
       console.log("Webhook response data:", data);
 
-      const aiMessage: ChatMessage = { sender: "ai", text: data?.output || "No response from AI." };
+      const aiMessage: ChatMessage = { sender: "ai", text: data?.message || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
+
+      // Update suggested actions based on AI response
+      if (data.suggestedActions && Array.isArray(data.suggestedActions) && data.suggestedActions.length > 0) {
+        setCurrentSuggestedActions(data.suggestedActions);
+      } else {
+        setCurrentSuggestedActions(["What can you do?"]); // Default if no suggestions
+      }
+
     } catch (error: any) {
       clearTimeout(timeoutId); // Ensure timeout is cleared even on error
       if (error.name === 'AbortError') {
@@ -176,6 +193,8 @@ const Chat: React.FC = () => {
           { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
         ]);
       }
+      // On error, revert to default suggestion
+      setCurrentSuggestedActions(["What can you do?"]);
     } finally {
       setIsLoading(false);
     }
@@ -186,6 +205,12 @@ const Chat: React.FC = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleChipClick = (action: string) => {
+    setInput(action);
+    // You can uncomment the line below if you want clicking a chip to immediately send the message
+    // handleSendMessage();
   };
 
   return (
@@ -232,6 +257,23 @@ const Chat: React.FC = () => {
           </div>
         </ScrollArea>
       </div>
+
+      {/* Suggested Actions Chips */}
+      {currentSuggestedActions.length > 0 && (
+        <div className="p-4 pt-0 flex flex-wrap gap-2 justify-center">
+          {currentSuggestedActions.map((action, index) => (
+            <Badge
+              key={index}
+              variant="secondary"
+              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 text-base px-4 py-2"
+              onClick={() => handleChipClick(action)}
+            >
+              {action}
+            </Badge>
+          ))}
+        </div>
+      )}
+
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl">
         {fileUploadEnabled && (
