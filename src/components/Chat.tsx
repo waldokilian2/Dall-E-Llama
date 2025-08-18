@@ -134,26 +134,17 @@ const Chat: React.FC = () => {
     const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000); // Convert seconds to milliseconds
 
     try {
-      const payload: any = {
-        sessionId: sessionId,
-        action: "sendMessage",
-        chatInput: chatInput,
-      };
-
-      if (fileName) {
-        payload.file = {
-          name: fileName,
-          type: fileType,
-          content: fileContent,
-        };
-      }
-
       const response = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          sessionId: sessionId,
+          action: "sendMessage",
+          chatInput: chatInput,
+          ...(fileName && { file: { name: fileName, type: fileType, content: fileContent } }),
+        }),
         signal: controller.signal, // Attach the abort signal
       });
 
@@ -163,15 +154,28 @@ const Chat: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("Webhook response data:", data);
+      const rawData = await response.json();
+      console.log("Webhook raw response data:", rawData); // Log raw data for debugging
 
-      const aiMessage: ChatMessage = { sender: "ai", text: data?.message || "No response from AI." };
+      let parsedData: any = {};
+      if (rawData && typeof rawData.output === 'string') {
+        try {
+          parsedData = JSON.parse(rawData.output);
+        } catch (parseError) {
+          console.error("Error parsing nested JSON from 'output' field:", parseError);
+          // Fallback if nested parsing fails, use rawData if it has message/suggestedActions directly
+          parsedData = rawData;
+        }
+      } else {
+        parsedData = rawData; // If no 'output' string, assume data is directly in rawData
+      }
+
+      const aiMessage: ChatMessage = { sender: "ai", text: parsedData?.message || "No response from AI." };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
 
       // Update suggested actions based on AI response
-      if (data.suggestedActions && Array.isArray(data.suggestedActions) && data.suggestedActions.length > 0) {
-        setCurrentSuggestedActions(data.suggestedActions);
+      if (parsedData.suggestedActions && Array.isArray(parsedData.suggestedActions) && parsedData.suggestedActions.length > 0) {
+        setCurrentSuggestedActions(parsedData.suggestedActions);
       } else {
         setCurrentSuggestedActions(["What can you do?"]); // Default if no suggestions
       }
