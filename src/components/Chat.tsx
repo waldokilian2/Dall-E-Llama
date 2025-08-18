@@ -155,8 +155,17 @@ const Chat: React.FC = () => {
       let aiMessageText = "No response from AI.";
       let newSuggestedActions: string[] = ["What can you do?"];
 
-      // Parse the new expected format: [ { "output": { "message": "...", "suggestedActions": [...] } } ]
-      if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+      // Prioritize the exact format provided by the user: { "output": { "message": "...", "suggestedActions": [...] } }
+      if (rawData && typeof rawData === 'object' && rawData.output) {
+        const output = rawData.output;
+        if (output.message) {
+          aiMessageText = output.message;
+        }
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
+        }
+      } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+        // Fallback for the previously assumed array format: [ { "output": { "message": "...", "suggestedActions": [...] } } ]
         const output = rawData[0].output;
         if (output.message) {
           aiMessageText = output.message;
@@ -165,9 +174,8 @@ const Chat: React.FC = () => {
           newSuggestedActions = output.suggestedActions;
         }
       } else {
-        // Fallback for unexpected structure, log a warning
+        // General fallback for direct properties on rawData (e.g., { message: "...", suggestedActions: [...] })
         console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
-        // This fallback handles cases where the AI might send a direct object instead of the array structure
         if (rawData?.message) {
             aiMessageText = rawData.message;
         }
