@@ -20,12 +20,13 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           isUser ? "border-blue-500/50" : "border-gray-600/50"
         } ${messageClasses}`}
       >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          className="prose prose-invert max-w-none" // Apply prose styles for better readability of markdown
-        >
-          {text}
-        </ReactMarkdown>
+        <div className="prose prose-invert max-w-none"> {/* Apply prose styles here */}
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+          >
+            {text}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   );
