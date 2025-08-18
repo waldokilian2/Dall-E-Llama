@@ -264,8 +264,8 @@ const Chat: React.FC = () => {
           {currentSuggestedActions.map((action, index) => (
             <Badge
               key={index}
-              variant="secondary"
-              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 text-base px-4 py-2"
+              // Removed variant="secondary" to apply custom styling
+              className="cursor-pointer text-foreground text-base px-4 py-2 rounded-full shadow-lg backdrop-filter backdrop-blur-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-colors duration-200"
               onClick={() => handleChipClick(action)}
             >
               {action}
