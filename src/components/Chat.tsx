@@ -134,7 +134,7 @@ const Chat: React.FC = () => {
     const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000); // Convert seconds to milliseconds
 
     try {
-      const response = await fetch(n8nWebhookUrl, {
+      const rawData = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,39 +146,39 @@ const Chat: React.FC = () => {
           ...(fileName && { file: { name: fileName, type: fileType, content: fileContent } }),
         }),
         signal: controller.signal, // Attach the abort signal
-      });
+      }).then(res => res.json());
 
       clearTimeout(timeoutId); // Clear the timeout if the fetch completes
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const rawData = await response.json();
       console.log("Webhook raw response data:", rawData); // Log raw data for debugging
 
-      let parsedData: any = {};
-      if (rawData && typeof rawData.output === 'string') {
-        try {
-          parsedData = JSON.parse(rawData.output);
-        } catch (parseError) {
-          console.error("Error parsing nested JSON from 'output' field:", parseError);
-          // Fallback if nested parsing fails, use rawData if it has message/suggestedActions directly
-          parsedData = rawData;
+      let aiMessageText = "No response from AI.";
+      let newSuggestedActions: string[] = ["What can you do?"];
+
+      // Parse the new expected format: [ { "output": { "message": "...", "suggestedActions": [...] } } ]
+      if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+        const output = rawData[0].output;
+        if (output.message) {
+          aiMessageText = output.message;
+        }
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
         }
       } else {
-        parsedData = rawData; // If no 'output' string, assume data is directly in rawData
+        // Fallback for unexpected structure, log a warning
+        console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
+        // This fallback handles cases where the AI might send a direct object instead of the array structure
+        if (rawData?.message) {
+            aiMessageText = rawData.message;
+        }
+        if (Array.isArray(rawData?.suggestedActions) && rawData.suggestedActions.length > 0) {
+            newSuggestedActions = rawData.suggestedActions;
+        }
       }
 
-      const aiMessage: ChatMessage = { sender: "ai", text: parsedData?.message || "No response from AI." };
+      const aiMessage: ChatMessage = { sender: "ai", text: aiMessageText };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-
-      // Update suggested actions based on AI response
-      if (parsedData.suggestedActions && Array.isArray(parsedData.suggestedActions) && parsedData.suggestedActions.length > 0) {
-        setCurrentSuggestedActions(parsedData.suggestedActions);
-      } else {
-        setCurrentSuggestedActions(["What can you do?"]); // Default if no suggestions
-      }
+      setCurrentSuggestedActions(newSuggestedActions);
 
     } catch (error: any) {
       clearTimeout(timeoutId); // Ensure timeout is cleared even on error
