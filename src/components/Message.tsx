@@ -1,5 +1,6 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm"; // For GitHub Flavored Markdown
 
 interface MessageProps {
   sender: "user" | "ai";
@@ -7,23 +8,24 @@ interface MessageProps {
 }
 
 const Message: React.FC<MessageProps> = ({ sender, text }) => {
+  const isUser = sender === "user";
+  const messageClasses = isUser
+    ? "bg-blue-600/50 text-white rounded-br-none ml-auto"
+    : "bg-gray-700/30 text-foreground rounded-bl-none mr-auto";
+
   return (
-    <div
-      className={cn(
-        "flex w-full mb-2",
-        sender === "user" ? "justify-end" : "justify-start",
-      )}
-    >
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={cn(
-          "max-w-[70%] p-3 rounded-lg shadow-lg", // Increased shadow for more depth
-          "backdrop-filter backdrop-blur-lg bg-opacity-20", // Glass effect
-          sender === "user"
-            ? "bg-purple-600/30 text-foreground rounded-br-none border border-purple-500/50" // User message: purple-ish glass, theme-aware text
-            : "bg-gray-700/30 text-foreground rounded-bl-none border border-gray-600/50", // AI message: neutral glass, theme-aware text
-        )}
+        className={`max-w-[70%] p-3 rounded-lg shadow-md border ${
+          isUser ? "border-blue-500/50" : "border-gray-600/50"
+        } ${messageClasses}`}
       >
-        {text}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          className="prose prose-invert max-w-none" // Apply prose styles for better readability of markdown
+        >
+          {text}
+        </ReactMarkdown>
       </div>
     </div>
   );
