@@ -26,10 +26,10 @@ const Workflows: React.FC = () => {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
       const result = await response.json();
-      // Ensure the result is an array, even if the API returns a single object or null
+      // If the API returns a single object, wrap it in an array
       if (!Array.isArray(result)) {
-        console.warn("API did not return an array for workflows, received:", result);
-        return []; // Return an empty array to prevent .map() errors
+        console.warn("API did not return an array for workflows, received a single object. Wrapping it in an array.", result);
+        return [result]; 
       }
       return result;
     },
