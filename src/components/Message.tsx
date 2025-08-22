@@ -37,7 +37,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`relative max-w-[70%] p-3 rounded-lg shadow-md border ${
+        className={`group relative max-w-[70%] p-3 rounded-lg shadow-md border ${
           isUser ? "border-blue-500/50" : "border-gray-600/50"
         } ${messageClasses}`}
       >
