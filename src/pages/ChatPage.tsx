@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Chat from "@/components/Chat";
 import { showError } from "@/utils/toast";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const ChatPage = () => {
   const [pageLoaded, setPageLoaded] = useState(false);
@@ -47,7 +46,6 @@ const ChatPage = () => {
       <div className="relative z-10 w-full max-w-3xl h-[90vh] rounded-xl overflow-hidden backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
         <Chat n8nWebhookUrl={n8nWebhookUrl} />
       </div>
-      <MadeWithDyad />
     </div>
   );
 };

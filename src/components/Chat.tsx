@@ -5,10 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Brain, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
-import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./SettingsDialog";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -35,7 +34,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -254,7 +253,6 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
             <Settings className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">Settings</span>
           </Button>
-          <ThemeToggle />
         </div>
       </div>
 
