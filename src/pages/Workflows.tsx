@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Import Input component
-import { Brain, Loader2, Search } from "lucide-react"; // Import Search icon
+import { Input } from "@/components/ui/input";
+import { Brain, Loader2, Search, Settings } from "lucide-react"; // Import Settings icon
 import { showError } from "@/utils/toast";
-
+import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog"; // Import the new dialog
 
 interface Workflow {
   id: string;
@@ -14,16 +14,21 @@ interface Workflow {
   description: string;
 }
 
-const N8N_WORKFLOWS_URL = "http://localhost:5678/webhook/workflows";
+const DEFAULT_N8N_WORKFLOWS_URL = "http://localhost:5678/webhook/workflows";
 
 const Workflows: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
+  const queryClient = useQueryClient(); // Initialize query client
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isWorkflowSettingsOpen, setIsWorkflowSettingsOpen] = useState<boolean>(false);
+  const [n8nWorkflowsUrl, setN8nWorkflowsUrl] = useState<string>(
+    localStorage.getItem("n8nWorkflowsUrl") || DEFAULT_N8N_WORKFLOWS_URL
+  );
 
   const { data: workflows, isLoading, isError, error } = useQuery<Workflow[], Error>({
-    queryKey: ["n8nWorkflows"],
+    queryKey: ["n8nWorkflows", n8nWorkflowsUrl], // Add n8nWorkflowsUrl to queryKey
     queryFn: async () => {
-      const response = await fetch(N8N_WORKFLOWS_URL);
+      const response = await fetch(n8nWorkflowsUrl); // Use the state variable
       if (!response.ok) {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
@@ -39,7 +44,7 @@ const Workflows: React.FC = () => {
     staleTime: 5 * 60 * 1000, 
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isError) {
       showError(`Error loading workflows: ${error?.message || "Unknown error"}`);
     }
@@ -49,7 +54,12 @@ const Workflows: React.FC = () => {
     navigate(`/chat/${encodeURIComponent(workflowId)}`);
   };
 
-  // Filter workflows based on search term
+  const handleSaveWorkflowSettings = (newUrl: string) => {
+    setN8nWorkflowsUrl(newUrl);
+    localStorage.setItem("n8nWorkflowsUrl", newUrl);
+    queryClient.invalidateQueries({ queryKey: ["n8nWorkflows"] }); // Invalidate and refetch workflows
+  };
+
   const filteredWorkflows = workflows?.filter(workflow =>
     workflow.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -63,13 +73,26 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto"> {/* Adjusted background for light/dark mode */}
-        <div className="flex items-center space-x-2 mb-6">
-          <Brain className="h-12 w-12 text-purple-400" />
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
-            Dall-E Llama
-          </h1>
+      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto">
+        {/* Header with Title and Settings Button */}
+        <div className="flex justify-between items-center w-full mb-6">
+          <div className="flex items-center space-x-2 mx-auto"> {/* Centered title */}
+            <Brain className="h-12 w-12 text-purple-400" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+              Dall-E Llama
+            </h1>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsWorkflowSettingsOpen(true)} 
+            className="absolute right-6 top-6" // Position settings button
+          >
+            <Settings className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Settings</span>
+          </Button>
         </div>
+        
         <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">
           Select an AI Agent to Chat With
         </h2>
@@ -95,7 +118,7 @@ const Workflows: React.FC = () => {
 
         {isError && (
           <div className="text-red-500 text-center">
-            Failed to load AI agents. Please check the N8N server and URL ({N8N_WORKFLOWS_URL}).
+            Failed to load AI agents. Please check the N8N server and URL ({n8nWorkflowsUrl}).
             <p className="text-sm text-red-400 mt-2">{error?.message}</p>
           </div>
         )}
@@ -127,6 +150,13 @@ const Workflows: React.FC = () => {
           ))}
         </div>
       </div>
+
+      <WorkflowSettingsDialog
+        open={isWorkflowSettingsOpen}
+        onOpenChange={setIsWorkflowSettingsOpen}
+        currentN8nWorkflowsUrl={n8nWorkflowsUrl}
+        onSave={handleSaveWorkflowSettings}
+      />
     </div>
   );
 };
