@@ -5,11 +5,12 @@
 Dall-E Llama is a modern, interactive AI chat application designed to be a versatile tool for developers. It features a sleek, responsive user interface built with React, TypeScript, and Tailwind CSS, leveraging `shadcn/ui` components for a polished look and feel.
 
 Key features include:
-*   **AI Agent Selection:** A landing page to fetch and display available AI agents (N8N workflows) from a configurable endpoint.
+*   **AI Agent Selection & Search:** A landing page to fetch and display available AI agents (N8N workflows) from a configurable endpoint, with the ability to filter agents using a search field.
+*   **Customizable N8N Workflows URL:** Configure the endpoint for fetching AI agents directly from the landing page settings.
 *   **AI Chat Integration:** Connects to a selected N8N webhook for AI agent communication, allowing for dynamic and intelligent responses.
 *   **File Uploads:** Supports attaching `.txt`, `.pdf`, `.doc`, and `.docx` files to messages, enabling context-rich conversations.
-*   **Customizable Settings:** Users can enable/disable file uploads and set a response timeout directly within the chat interface.
-*   **Theme Toggle:** Switch between light and dark modes for a personalized experience.
+*   **Customizable Chat Settings:** Users can enable/disable file uploads and set a response timeout directly within the chat interface.
+*   **Theme Toggle:** Switch between light and dark modes for a personalized experience, available on both the agent selection and chat pages.
 *   **Suggested Actions:** AI can provide suggested follow-up actions as interactive chips.
 *   **Copy AI Responses:** Easily copy AI-generated text to your clipboard.
 *   **New Chat Functionality:** Start a fresh conversation at any time.
@@ -26,7 +27,7 @@ Follow these instructions to set up and run the Dall-E Llama application on your
 Before you begin, ensure you have the following installed:
 *   **Node.js:** Version 18 or higher. You can download it from [nodejs.org](https://nodejs.org/).
 *   **npm** (Node Package Manager) or **pnpm** (Performant Node Package Manager): npm comes with Node.js, or you can install pnpm globally: `npm install -g pnpm`.
-*   **N8N Instance:** A running N8N instance with workflows exposed as webhooks. The application will attempt to fetch a list of available workflows from `http://localhost:5678/webhook/workflows`. Ensure your N8N instance is accessible at this (or a configured) URL and has workflows set up to respond to `/webhook/workflows` with a list of available chat agents.
+*   **N8N Instance:** A running N8N instance with workflows exposed as webhooks. The application will attempt to fetch a list of available workflows from a configurable URL (defaulting to `http://localhost:5678/webhook/workflows`). Ensure your N8N instance is accessible at this (or a configured) URL and has workflows set up to respond to `/webhook/workflows` with a list of available chat agents.
 
 ### Installation
 
@@ -59,11 +60,16 @@ The application will typically run on `http://localhost:32100`. Open this URL in
 
 ### Usage
 
-1.  **Workflow Selection:** Upon launching the application, you will be presented with a list of available AI agents (workflows) fetched from your N8N instance.
+1.  **Workflow Selection Page:** Upon launching the application, you will be presented with a list of available AI agents (workflows) fetched from your N8N instance.
+    *   **Search Agents:** Use the search bar to filter agents by name.
+    *   **N8N URL Settings:** Click the `Settings` icon (gear icon) in the top right to configure the N8N Workflows URL. This setting is saved locally.
+    *   **Theme Toggle:** Use the sun/moon icon next to the settings to switch between light and dark modes.
 2.  **Select an Agent:** Click the "Select Agent" button for the workflow you wish to interact with. This will take you to the chat screen.
 3.  **Chat Interface:** You can now chat with the selected AI agent.
-4.  **Settings:** Click the `Settings` icon (gear icon) in the top right of the chat screen to configure:
-    *   **Enable File Upload:** Toggle whether the file attachment feature is active.
-    *   **Response Timeout (s):** Set the maximum time (in seconds) to wait for an AI response.
-
-These settings are saved locally in your browser's local storage.
+    *   **New Chat:** Click the "New Chat" icon (message square plus) to start a fresh conversation.
+    *   **Back to Workflows:** Click the back arrow icon to return to the agent selection page.
+    *   **Chat Settings:** Click the `Settings` icon (gear icon) to configure:
+        *   **Enable File Upload:** Toggle whether the file attachment feature is active.
+        *   **Response Timeout (s):** Set the maximum time (in seconds) to wait for an AI response.
+    *   **Theme Toggle:** Use the sun/moon icon next to the settings to switch between light and dark modes.
+    These settings are saved locally in your browser's local storage.
