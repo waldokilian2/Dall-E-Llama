@@ -8,6 +8,7 @@ import { showError } from "@/utils/toast";
 import SettingsDialog from "./SettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -253,6 +254,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
             <Settings className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">Settings</span>
           </Button>
+          <ThemeToggle /> {/* Theme toggle */}
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Workflows from "./pages/Workflows";
 import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
-import { ThemeToggle } from "./components/ThemeToggle"; // Import ThemeToggle
+// ThemeToggle will be moved to individual pages/components
 
 const queryClient = new QueryClient();
 
@@ -16,10 +16,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        {/* ThemeToggle positioned globally */}
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
+        {/* ThemeToggle is now handled within Workflows and ChatPage components */}
         <Routes>
           <Route path="/" element={<Workflows />} />
           <Route path="/chat/:workflowId" element={<ChatPage />} />

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brain, Loader2, Search, Settings } from "lucide-react"; // Import Settings icon
+import { Brain, Loader2, Search, Settings } from "lucide-react";
 import { showError } from "@/utils/toast";
-import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog"; // Import the new dialog
+import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
+import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
 
 interface Workflow {
   id: string;
@@ -18,7 +19,7 @@ const DEFAULT_N8N_WORKFLOWS_URL = "http://localhost:5678/webhook/workflows";
 
 const Workflows: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient(); // Initialize query client
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isWorkflowSettingsOpen, setIsWorkflowSettingsOpen] = useState<boolean>(false);
   const [n8nWorkflowsUrl, setN8nWorkflowsUrl] = useState<string>(
@@ -26,9 +27,9 @@ const Workflows: React.FC = () => {
   );
 
   const { data: workflows, isLoading, isError, error } = useQuery<Workflow[], Error>({
-    queryKey: ["n8nWorkflows", n8nWorkflowsUrl], // Add n8nWorkflowsUrl to queryKey
+    queryKey: ["n8nWorkflows", n8nWorkflowsUrl],
     queryFn: async () => {
-      const response = await fetch(n8nWorkflowsUrl); // Use the state variable
+      const response = await fetch(n8nWorkflowsUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
@@ -57,7 +58,7 @@ const Workflows: React.FC = () => {
   const handleSaveWorkflowSettings = (newUrl: string) => {
     setN8nWorkflowsUrl(newUrl);
     localStorage.setItem("n8nWorkflowsUrl", newUrl);
-    queryClient.invalidateQueries({ queryKey: ["n8nWorkflows"] }); // Invalidate and refetch workflows
+    queryClient.invalidateQueries({ queryKey: ["n8nWorkflows"] });
   };
 
   const filteredWorkflows = workflows?.filter(workflow =>
@@ -76,21 +77,23 @@ const Workflows: React.FC = () => {
       <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto">
         {/* Header with Title and Settings Button */}
         <div className="flex justify-between items-center w-full mb-6">
-          <div className="flex items-center space-x-2 mx-auto"> {/* Centered title */}
+          <div className="flex items-center space-x-2 mx-auto">
             <Brain className="h-12 w-12 text-purple-400" />
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
               Dall-E Llama
             </h1>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsWorkflowSettingsOpen(true)} 
-            className="absolute right-6 top-6" // Position settings button
-          >
-            <Settings className="h-[1.2rem] w-[1.2rem]" />
-            <span className="sr-only">Settings</span>
-          </Button>
+          <div className="absolute right-6 top-6 flex items-center space-x-2"> {/* Group settings and theme toggle */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsWorkflowSettingsOpen(true)} 
+            >
+              <Settings className="h-[1.2rem] w-[1.2rem]" />
+              <span className="sr-only">Settings</span>
+            </Button>
+            <ThemeToggle /> {/* Theme toggle */}
+          </div>
         </div>
         
         <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">
