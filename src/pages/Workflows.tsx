@@ -24,7 +24,19 @@ const Workflows: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
-      const result = await response.json();
+      
+      // Read response as text first for debugging
+      const responseText = await response.text();
+      console.log("Raw N8N Workflows Response:", responseText);
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse JSON from N8N Workflows response:", parseError);
+        throw new Error(`Failed to parse JSON from N8N Workflows response: ${parseError instanceof Error ? parseError.message : String(parseError)}. Raw response: ${responseText.substring(0, 200)}...`);
+      }
+
       // If the API returns a single object, wrap it in an array
       if (!Array.isArray(result)) {
         console.warn("API did not return an array for workflows, received a single object. Wrapping it in an array.", result);
