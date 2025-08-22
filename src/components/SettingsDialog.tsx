@@ -10,47 +10,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch"; // Import Switch
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentUrl: string;
   currentFileUploadEnabled: boolean;
-  currentResponseTimeout: number; // New prop for response timeout
-  onSave: (newUrl: string, newFileUploadEnabled: boolean, newResponseTimeout: number) => void; // Updated onSave signature
+  currentResponseTimeout: number;
+  onSave: (newFileUploadEnabled: boolean, newResponseTimeout: number) => void; // Updated onSave signature
 }
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
   open,
   onOpenChange,
-  currentUrl,
   currentFileUploadEnabled,
   currentResponseTimeout,
   onSave,
 }) => {
-  const [urlInput, setUrlInput] = useState(currentUrl);
   const [fileUploadEnabled, setFileUploadEnabled] = useState(currentFileUploadEnabled);
-  const [responseTimeoutInput, setResponseTimeoutInput] = useState(String(currentResponseTimeout)); // State for timeout input
+  const [responseTimeoutInput, setResponseTimeoutInput] = useState(String(currentResponseTimeout));
   const { toast } = useToast();
 
   useEffect(() => {
-    setUrlInput(currentUrl);
     setFileUploadEnabled(currentFileUploadEnabled);
     setResponseTimeoutInput(String(currentResponseTimeout));
-  }, [currentUrl, currentFileUploadEnabled, currentResponseTimeout, open]); // Sync inputs with props when dialog opens
+  }, [currentFileUploadEnabled, currentResponseTimeout, open]);
 
   const handleSave = () => {
-    if (urlInput.trim() === "") {
-      toast({
-        title: "Error",
-        description: "N8N Webhook URL cannot be empty.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const parsedTimeout = parseInt(responseTimeoutInput, 10);
     if (isNaN(parsedTimeout) || parsedTimeout <= 0) {
       toast({
@@ -61,7 +48,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       return;
     }
 
-    onSave(urlInput, fileUploadEnabled, parsedTimeout); // Pass all settings
+    onSave(fileUploadEnabled, parsedTimeout);
     onOpenChange(false);
     toast({
       title: "Success",
@@ -75,21 +62,10 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Configure your N8N Webhook URL and other preferences.
+            Configure your chat preferences.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="n8n-url" className="text-right">
-              N8N URL
-            </Label>
-            <Input
-              id="n8n-url"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              className="col-span-3 bg-input text-foreground border-border"
-            />
-          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="file-upload-toggle" className="text-right">
               Enable File Upload

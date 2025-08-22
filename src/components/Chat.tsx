@@ -2,30 +2,30 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react"; // Added MessageSquarePlus icon
+import { Send, Brain, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./SettingsDialog";
-import { Badge } from "@/components/ui/badge"; // Import Badge for chips
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface ChatMessage {
   sender: "user" | "ai";
   text: string;
 }
 
-// Default N8N Webhook URL
-const DEFAULT_N8N_WEBHOOK_URL = "http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat";
+interface ChatProps {
+  n8nWebhookUrl: string; // Now received as a prop
+}
+
 const DEFAULT_FILE_UPLOAD_ENABLED = false;
 const DEFAULT_RESPONSE_TIMEOUT_SECONDS = 120; // 2 minutes
 
-const Chat: React.FC = () => {
+const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [n8nWebhookUrl, setN8nWebhookUrl] = useState<string>(
-    localStorage.getItem("n8nWebhookUrl") || DEFAULT_N8N_WEBHOOK_URL
-  );
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [fileUploadEnabled, setFileUploadEnabled] = useState<boolean>(
     localStorage.getItem("fileUploadEnabled") === "true" || DEFAULT_FILE_UPLOAD_ENABLED
@@ -35,13 +35,12 @@ const Chat: React.FC = () => {
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Use a function to initialize sessionId to ensure it's only created once
   const [sessionId, setSessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
-  // New state for current suggested actions, initialized with a default
   const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
 
   const scrollToBottom = () => {
@@ -52,9 +51,7 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSaveSettings = (newUrl: string, newFileUploadEnabled: boolean, newResponseTimeout: number) => {
-    setN8nWebhookUrl(newUrl);
-    localStorage.setItem("n8nWebhookUrl", newUrl);
+  const handleSaveSettings = (newFileUploadEnabled: boolean, newResponseTimeout: number) => {
     setFileUploadEnabled(newFileUploadEnabled);
     localStorage.setItem("fileUploadEnabled", String(newFileUploadEnabled));
     setResponseTimeoutSeconds(newResponseTimeout);
@@ -89,7 +86,6 @@ const Chat: React.FC = () => {
     let fileName: string | undefined = undefined;
     let fileType: string | undefined = undefined;
 
-    // Clear current suggested actions when user sends a message
     setCurrentSuggestedActions([]);
 
     if (selectedFile) {
@@ -105,7 +101,6 @@ const Chat: React.FC = () => {
         reader.onerror = () => {
           showError("Failed to read text file.");
           setIsLoading(false);
-          // Re-add default suggestion on error
           setCurrentSuggestedActions(["What can you do?"]);
         };
         reader.readAsText(selectedFile);
@@ -132,7 +127,7 @@ const Chat: React.FC = () => {
     setIsLoading(true);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000); // Convert seconds to milliseconds
+    const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000);
 
     try {
       const rawData = await fetch(n8nWebhookUrl, {
@@ -146,17 +141,16 @@ const Chat: React.FC = () => {
           chatInput: chatInput,
           ...(fileName && { file: { name: fileName, type: fileType, content: fileContent } }),
         }),
-        signal: controller.signal, // Attach the abort signal
+        signal: controller.signal,
       }).then(res => res.json());
 
-      clearTimeout(timeoutId); // Clear the timeout if the fetch completes
+      clearTimeout(timeoutId);
 
-      console.log("Webhook raw response data:", rawData); // Log raw data for debugging
+      console.log("Webhook raw response data:", rawData);
 
       let aiMessageText = "No response from AI.";
       let newSuggestedActions: string[] = ["What can you do?"];
 
-      // Prioritize the exact format provided by the user: { "output": { "message": "...", "suggestedActions": [...] } }
       if (rawData && typeof rawData === 'object' && rawData.output) {
         const output = rawData.output;
         if (output.message) {
@@ -166,7 +160,6 @@ const Chat: React.FC = () => {
           newSuggestedActions = output.suggestedActions;
         }
       } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
-        // Fallback for the previously assumed array format: [ { "output": { "message": "...", "suggestedActions": [...] } } ]
         const output = rawData[0].output;
         if (output.message) {
           aiMessageText = output.message;
@@ -175,7 +168,6 @@ const Chat: React.FC = () => {
           newSuggestedActions = output.suggestedActions;
         }
       } else {
-        // General fallback for direct properties on rawData (e.g., { message: "...", suggestedActions: [...] })
         console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
         if (rawData?.message) {
             aiMessageText = rawData.message;
@@ -190,7 +182,7 @@ const Chat: React.FC = () => {
       setCurrentSuggestedActions(newSuggestedActions);
 
     } catch (error: any) {
-      clearTimeout(timeoutId); // Ensure timeout is cleared even on error
+      clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         console.error("Request timed out:", error);
         showError(`Request timed out after ${responseTimeoutSeconds} seconds. Please try again or increase the timeout in settings.`);
@@ -206,7 +198,6 @@ const Chat: React.FC = () => {
           { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
         ]);
       }
-      // On error, revert to default suggestion
       setCurrentSuggestedActions(["What can you do?"]);
     } finally {
       setIsLoading(false);
@@ -222,8 +213,6 @@ const Chat: React.FC = () => {
 
   const handleChipClick = (action: string) => {
     setInput(action);
-    // You can uncomment the line below if you want clicking a chip to immediately send the message
-    // handleSendMessage();
   };
 
   const handleNewChat = useCallback(() => {
@@ -235,7 +224,7 @@ const Chat: React.FC = () => {
     }
     setSessionId(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
     setCurrentSuggestedActions(["What can you do?"]);
-    setIsLoading(false); // Ensure loading state is reset
+    setIsLoading(false);
   }, []);
 
   return (
@@ -257,6 +246,10 @@ const Chat: React.FC = () => {
         </div>
         {/* Right-aligned controls */}
         <div className="ml-auto flex items-center space-x-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')}> {/* Go back to workflow selection */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span className="sr-only">Back to Workflows</span>
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
             <Settings className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">Settings</span>
@@ -295,7 +288,6 @@ const Chat: React.FC = () => {
           {currentSuggestedActions.map((action, index) => (
             <Badge
               key={index}
-              // Removed variant="secondary" to apply custom styling
               className="cursor-pointer text-foreground text-base px-4 py-2 rounded-full shadow-lg backdrop-filter backdrop-blur-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-colors duration-200"
               onClick={() => handleChipClick(action)}
             >
@@ -361,7 +353,6 @@ const Chat: React.FC = () => {
       <SettingsDialog
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
-        currentUrl={n8nWebhookUrl}
         currentFileUploadEnabled={fileUploadEnabled}
         currentResponseTimeout={responseTimeoutSeconds}
         onSave={handleSaveSettings}

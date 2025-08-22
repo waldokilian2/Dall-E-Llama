@@ -5,9 +5,10 @@
 Dall-E Llama is a modern, interactive AI chat application designed to be a versatile tool for developers. It features a sleek, responsive user interface built with React, TypeScript, and Tailwind CSS, leveraging `shadcn/ui` components for a polished look and feel.
 
 Key features include:
-*   **AI Chat Integration:** Connects to an N8N webhook for AI agent communication, allowing for dynamic and intelligent responses.
+*   **AI Agent Selection:** A landing page to fetch and display available AI agents (N8N workflows) from a configurable endpoint.
+*   **AI Chat Integration:** Connects to a selected N8N webhook for AI agent communication, allowing for dynamic and intelligent responses.
 *   **File Uploads:** Supports attaching `.txt`, `.pdf`, `.doc`, and `.docx` files to messages, enabling context-rich conversations.
-*   **Customizable Settings:** Users can configure the N8N webhook URL, enable/disable file uploads, and set a response timeout directly within the application.
+*   **Customizable Settings:** Users can enable/disable file uploads and set a response timeout directly within the chat interface.
 *   **Theme Toggle:** Switch between light and dark modes for a personalized experience.
 *   **Suggested Actions:** AI can provide suggested follow-up actions as interactive chips.
 *   **Copy AI Responses:** Easily copy AI-generated text to your clipboard.
@@ -25,6 +26,7 @@ Follow these instructions to set up and run the Dall-E Llama application on your
 Before you begin, ensure you have the following installed:
 *   **Node.js:** Version 18 or higher. You can download it from [nodejs.org](https://nodejs.org/).
 *   **npm** (Node Package Manager) or **pnpm** (Performant Node Package Manager): npm comes with Node.js, or you can install pnpm globally: `npm install -g pnpm`.
+*   **N8N Instance:** A running N8N instance with workflows exposed as webhooks. The application will attempt to fetch a list of available workflows from `http://localhost:5678/webhook/workflows`. Ensure your N8N instance is accessible at this (or a configured) URL and has workflows set up to respond to `/webhook/workflows` with a list of available chat agents.
 
 ### Installation
 
@@ -55,11 +57,13 @@ npm run dev
 
 The application will typically run on `http://localhost:32100`. Open this URL in your web browser.
 
-### Configuration
+### Usage
 
-Upon first launch, or by clicking the `Settings` icon (gear icon) in the top right, you can configure:
-*   **N8N Webhook URL:** The endpoint for your AI agent (e.g., an N8N workflow). The default is `http://localhost:5678/webhook/86a50552-8058-4896-bd7e-ab95eba073ce/chat`.
-*   **Enable File Upload:** Toggle whether the file attachment feature is active.
-*   **Response Timeout (s):** Set the maximum time (in seconds) to wait for an AI response.
+1.  **Workflow Selection:** Upon launching the application, you will be presented with a list of available AI agents (workflows) fetched from your N8N instance.
+2.  **Select an Agent:** Click the "Select Agent" button for the workflow you wish to interact with. This will take you to the chat screen.
+3.  **Chat Interface:** You can now chat with the selected AI agent.
+4.  **Settings:** Click the `Settings` icon (gear icon) in the top right of the chat screen to configure:
+    *   **Enable File Upload:** Toggle whether the file attachment feature is active.
+    *   **Response Timeout (s):** Set the maximum time (in seconds) to wait for an AI response.
 
 These settings are saved locally in your browser's local storage.
