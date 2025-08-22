@@ -48,7 +48,7 @@ const Workflows: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-4 relative bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-background"> {/* Changed justify-start to justify-center */}
       {/* Background glowing gradients */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -56,7 +56,7 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto"> {/* Added mx-auto here */}
+      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto">
         <div className="flex items-center space-x-2 mb-6">
           <Brain className="h-12 w-12 text-purple-400" />
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
