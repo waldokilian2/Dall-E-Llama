@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Brain, Loader2 } from "lucide-react";
 import { showError } from "@/utils/toast";
-import { MadeWithDyad } from "@/components/made-with-dyad";
+
 
 interface Workflow {
   id: string;
@@ -108,7 +108,6 @@ const Workflows: React.FC = () => {
           ))}
         </div>
       </div>
-      <MadeWithDyad />
     </div>
   );
 };
