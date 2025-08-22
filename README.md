@@ -53,7 +53,7 @@ pnpm dev
 npm run dev
 ```
 
-The application will typically run on `http://localhost:8080`. Open this URL in your web browser.
+The application will typically run on `http://localhost:32100`. Open this URL in your web browser.
 
 ### Configuration
 
