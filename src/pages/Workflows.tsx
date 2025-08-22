@@ -88,10 +88,10 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {Array.isArray(workflows) && workflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-white/10 border border-white/20 text-foreground shadow-lg">
+            <Card key={workflow.id} className="bg-white/20 border border-white/30 text-foreground shadow-lg">
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
-                <CardDescription className="text-muted-foreground">{workflow.id}</CardDescription>
+                {/* Removed CardDescription displaying workflow.id */}
               </CardHeader>
               <CardContent>
                 <p>{workflow.description}</p>
