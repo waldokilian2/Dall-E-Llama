@@ -151,29 +151,28 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       let aiMessageText = "No response from AI.";
       let newSuggestedActions: string[] = ["What can you do?"];
 
-      if (rawData && typeof rawData === 'object' && rawData.output) {
-        const output = rawData.output;
-        if (output.message) {
-          aiMessageText = output.message;
+      // Helper function to extract message and actions from an object
+      const extractMessageAndActions = (obj: any) => {
+        if (obj?.message) {
+          aiMessageText = obj.message;
         }
-        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
-          newSuggestedActions = output.suggestedActions;
+        if (Array.isArray(obj?.suggestedActions) && obj.suggestedActions.length > 0) {
+          newSuggestedActions = obj.suggestedActions;
         }
-      } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
-        const output = rawData[0].output;
-        if (output.message) {
-          aiMessageText = output.message;
+      };
+
+      if (rawData) {
+        // Try to extract from rawData directly (e.g., { message: "...", suggestedActions: [...] })
+        extractMessageAndActions(rawData);
+
+        // If message not found, try from rawData.output (e.g., { output: { message: "...", suggestedActions: [...] } })
+        if (aiMessageText === "No response from AI." && rawData.output) {
+          extractMessageAndActions(rawData.output);
         }
-        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
-          newSuggestedActions = output.suggestedActions;
-        }
-      } else {
-        console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
-        if (rawData?.message) {
-            aiMessageText = rawData.message;
-        }
-        if (Array.isArray(rawData?.suggestedActions) && rawData.suggestedActions.length > 0) {
-            newSuggestedActions = rawData.suggestedActions;
+
+        // If still not found, try from rawData[0].output (e.g., [ { output: { message: "...", suggestedActions: [...] } } ])
+        if (aiMessageText === "No response from AI." && Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+          extractMessageAndActions(rawData[0].output);
         }
       }
 
