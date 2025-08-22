@@ -48,7 +48,7 @@ const Workflows: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-background"> {/* Changed justify-start to justify-center */}
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-background">
       {/* Background glowing gradients */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -89,7 +89,7 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {Array.isArray(workflows) && workflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-white/20 border border-white/30 text-foreground shadow-lg">
+            <Card key={workflow.id} className="bg-black/30 border border-white/30 text-foreground shadow-lg"> {/* Changed bg-white/20 to bg-black/30 */}
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
