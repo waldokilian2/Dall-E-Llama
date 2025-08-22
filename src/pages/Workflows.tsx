@@ -136,7 +136,7 @@ const Workflows: React.FC = () => {
           {filteredWorkflows.map((workflow) => (
             <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col">
               <CardHeader>
-                <CardTitle className="text-primary">{workflow.name}</CardTitle>
+                <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p>{workflow.description}</p>
