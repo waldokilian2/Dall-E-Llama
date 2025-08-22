@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input"; // Import Input component
+import { Brain, Loader2, Search } from "lucide-react"; // Import Search icon
 import { showError } from "@/utils/toast";
 
 
@@ -17,6 +18,7 @@ const N8N_WORKFLOWS_URL = "http://localhost:5678/webhook/workflows";
 
 const Workflows: React.FC = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
 
   const { data: workflows, isLoading, isError, error } = useQuery<Workflow[], Error>({
     queryKey: ["n8nWorkflows"],
@@ -47,6 +49,11 @@ const Workflows: React.FC = () => {
     navigate(`/chat/${encodeURIComponent(workflowId)}`);
   };
 
+  // Filter workflows based on search term
+  const filteredWorkflows = workflows?.filter(workflow =>
+    workflow.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-background">
       {/* Background glowing gradients */}
@@ -67,6 +74,18 @@ const Workflows: React.FC = () => {
           Select an AI Agent to Chat With
         </h2>
 
+        {/* Search Input Field */}
+        <div className="relative w-full max-w-md mb-8">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search agents by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-black/20 border border-white/30 rounded-md text-foreground placeholder:text-muted-foreground focus-visible:ring-purple-500"
+          />
+        </div>
+
         {isLoading && (
           <div className="flex items-center justify-center text-foreground">
             <Loader2 className="mr-2 h-6 w-6 animate-spin" />
@@ -81,19 +100,19 @@ const Workflows: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !isError && (!Array.isArray(workflows) || workflows.length === 0) && (
+        {!isLoading && !isError && filteredWorkflows.length === 0 && (
           <div className="text-muted-foreground text-center">
-            No AI agents found. Please ensure your N8N server is running and has workflows exposed.
+            No AI agents found matching your search.
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          {Array.isArray(workflows) && workflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col"> {/* Added flex flex-col */}
+          {filteredWorkflows.map((workflow) => (
+            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col">
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow"> {/* Added flex-grow */}
+              <CardContent className="flex-grow">
                 <p>{workflow.description}</p>
               </CardContent>
               <CardFooter>
