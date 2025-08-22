@@ -89,11 +89,11 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {Array.isArray(workflows) && workflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg"> {/* Adjusted background for light/dark mode */}
+            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col"> {/* Added flex flex-col */}
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-grow"> {/* Added flex-grow */}
                 <p>{workflow.description}</p>
               </CardContent>
               <CardFooter>
