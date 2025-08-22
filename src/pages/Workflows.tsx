@@ -25,7 +25,13 @@ const Workflows: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
-      return response.json();
+      const result = await response.json();
+      // Ensure the result is an array, even if the API returns a single object or null
+      if (!Array.isArray(result)) {
+        console.warn("API did not return an array for workflows, received:", result);
+        return []; // Return an empty array to prevent .map() errors
+      }
+      return result;
     },
     // Refetch every 5 minutes to keep the list updated
     staleTime: 5 * 60 * 1000, 
@@ -75,14 +81,14 @@ const Workflows: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !isError && (workflows?.length === 0 || !workflows) && (
+        {!isLoading && !isError && (!Array.isArray(workflows) || workflows.length === 0) && (
           <div className="text-muted-foreground text-center">
             No AI agents found. Please ensure your N8N server is running and has workflows exposed.
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          {workflows?.map((workflow) => (
+          {Array.isArray(workflows) && workflows.map((workflow) => (
             <Card key={workflow.id} className="bg-white/10 border border-white/20 text-foreground shadow-lg">
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
