@@ -56,7 +56,7 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto">
+      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto"> {/* Adjusted background for light/dark mode */}
         <div className="flex items-center space-x-2 mb-6">
           <Brain className="h-12 w-12 text-purple-400" />
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
@@ -89,7 +89,7 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {Array.isArray(workflows) && workflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-black/30 border border-white/30 text-foreground shadow-lg"> {/* Changed bg-white/20 to bg-black/30 */}
+            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg"> {/* Adjusted background for light/dark mode */}
               <CardHeader>
                 <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
