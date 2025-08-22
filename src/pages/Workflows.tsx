@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Brain, Loader2 } from "lucide-react";
 import { showError } from "@/utils/toast";
+import { MadeWithDyad } from "@/components/made-with-dyad"; // Ensure MadeWithDyad is imported
 
 interface Workflow {
   id: string;
@@ -25,17 +26,7 @@ const Workflows: React.FC = () => {
         throw new Error(`Failed to fetch workflows: ${response.statusText}`);
       }
       
-      // Read response as text first for debugging
-      const responseText = await response.text();
-      console.log("Raw N8N Workflows Response:", responseText);
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("Failed to parse JSON from N8N Workflows response:", parseError);
-        throw new Error(`Failed to parse JSON from N8N Workflows response: ${parseError instanceof Error ? parseError.message : String(parseError)}. Raw response: ${responseText.substring(0, 200)}...`);
-      }
+      const result = await response.json(); // Reverted to direct JSON parsing
 
       // If the API returns a single object, wrap it in an array
       if (!Array.isArray(result)) {
@@ -59,7 +50,7 @@ const Workflows: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-start p-4 relative bg-background"> {/* Removed overflow-hidden, changed justify-center to justify-start */}
       {/* Background glowing gradients */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -67,7 +58,7 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl overflow-hidden backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto"> {/* Added max-h and overflow-y-auto, removed overflow-hidden */}
         <div className="flex items-center space-x-2 mb-6">
           <Brain className="h-12 w-12 text-purple-400" />
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
@@ -120,6 +111,7 @@ const Workflows: React.FC = () => {
           ))}
         </div>
       </div>
+      <MadeWithDyad />
     </div>
   );
 };
