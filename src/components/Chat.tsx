@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain, Settings, Paperclip, XCircle } from "lucide-react";
+import { Send, Brain, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react"; // Added MessageSquarePlus icon
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import { ThemeToggle } from "./ThemeToggle";
@@ -38,7 +38,8 @@ const Chat: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+  // Use a function to initialize sessionId to ensure it's only created once
+  const [sessionId, setSessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
   // New state for current suggested actions, initialized with a default
   const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
@@ -225,10 +226,28 @@ const Chat: React.FC = () => {
     // handleSendMessage();
   };
 
+  const handleNewChat = useCallback(() => {
+    setMessages([]);
+    setInput("");
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setSessionId(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    setCurrentSuggestedActions(["What can you do?"]);
+    setIsLoading(false); // Ensure loading state is reset
+  }, []);
+
   return (
     <div className="flex flex-col h-full bg-transparent">
       {/* Header */}
       <div className="flex items-center p-4 border-b border-white/10 bg-transparent rounded-t-xl relative">
+        {/* Left-aligned New Chat button */}
+        <Button variant="ghost" size="icon" onClick={handleNewChat} className="absolute left-4 top-1/2 -translate-y-1/2">
+          <MessageSquarePlus className="h-[1.2rem] w-[1.2rem]" />
+          <span className="sr-only">New Chat</span>
+        </Button>
+
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
           <Brain className="h-10 w-10 text-purple-400" />
