@@ -62,6 +62,15 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 212.7 26.8% 83.9%;
+
+  /* Dark mode specific scrollbar thumb color */
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(200, 200, 200, 0.4); /* Lighter and slightly less transparent */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(200, 200, 200, 0.6); /* Even less transparent on hover */
+  }
 }
 
 html, body, #root {
