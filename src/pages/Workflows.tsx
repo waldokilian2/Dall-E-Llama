@@ -1,140 +1,164 @@
-"use client";
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Loader2, Search, Settings } from "lucide-react";
+import { showError } from "@/utils/toast";
+import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import llamaLogo from "@/assets/llama.png";
 
 interface Workflow {
   id: string;
   name: string;
   description: string;
-  icon: string;
 }
 
+const DEFAULT_N8N_WORKFLOWS_URL = "http://localhost:5678/webhook/workflows";
+
 const Workflows: React.FC = () => {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isWorkflowSettingsOpen, setIsWorkflowSettingsOpen] = useState<boolean>(false);
+  const [n8nWorkflowsUrl, setN8nWorkflowsUrl] = useState<string>(
+    localStorage.getItem("n8nWorkflowsUrl") || DEFAULT_N8N_WORKFLOWS_URL
+  );
+
+  const { data: workflows, isLoading, isError, error } = useQuery<Workflow[], Error>({
+    queryKey: ["n8nWorkflows", n8nWorkflowsUrl],
+    queryFn: async () => {
+      const response = await fetch(n8nWorkflowsUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch workflows: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+
+      if (!Array.isArray(result)) {
+        console.warn("API did not return an array for workflows, received a single object. Wrapping it in an array.", result);
+        return [result]; 
+      }
+      return result;
+    },
+    staleTime: 5 * 60 * 1000, 
+  });
 
   useEffect(() => {
-    // Simulate fetching workflows from an API
-    const fetchWorkflows = async () => {
-      // In a real application, you would fetch this from your backend
-      const dummyWorkflows: Workflow[] = [
-        {
-          id: '1',
-          name: 'Customer Support Triage',
-          description: 'Automatically categorize and route incoming customer support tickets.',
-          icon: '💬',
-        },
-        {
-          id: '2',
-          name: 'Lead Qualification',
-          description: 'Qualify sales leads based on predefined criteria and assign to sales reps.',
-          icon: '📈',
-        },
-        {
-          id: '3',
-          name: 'Social Media Monitoring',
-          description: 'Monitor social media for brand mentions and sentiment analysis.',
-          icon: '📱',
-        },
-        {
-          id: '4',
-          name: 'Content Generation',
-          description: 'Generate blog post ideas and draft initial content based on keywords.',
-          icon: '✍️',
-        },
-        {
-          id: '5',
-          name: 'Data Entry Automation',
-          description: 'Automate data extraction from documents and input into spreadsheets.',
-          icon: '📊',
-        },
-        {
-          id: '6',
-          name: 'Email Campaign Management',
-          description: 'Manage and automate personalized email marketing campaigns.',
-          icon: '📧',
-        },
-        {
-          id: '7',
-          name: 'Inventory Management',
-          description: 'Track inventory levels, reorder products, and manage stock alerts.',
-          icon: '📦',
-        },
-        {
-          id: '8',
-          name: 'Employee Onboarding',
-          description: 'Automate the onboarding process for new employees, including task assignment.',
-          icon: '🧑‍💻',
-        },
-      ];
-      setWorkflows(dummyWorkflows);
-    };
-
-    fetchWorkflows();
-  }, []);
-
-  const filteredWorkflows = useMemo(() => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    return workflows.filter(
-      (workflow) =>
-        workflow.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        workflow.description.toLowerCase().includes(lowerCaseSearchTerm)
-    );
-  }, [workflows, searchTerm]);
+    if (isError) {
+      showError(`Error loading workflows: ${error?.message || "Unknown error"}`);
+    }
+  }, [isError, error]);
 
   const handleSelectWorkflow = (workflowId: string) => {
-    console.log(`Selected workflow: ${workflowId}`);
-    // In a real app, you might navigate to a detail page or open a modal
+    navigate(`/chat/${encodeURIComponent(workflowId)}`);
   };
 
+  const handleSaveWorkflowSettings = (newUrl: string) => {
+    setN8nWorkflowsUrl(newUrl);
+    localStorage.setItem("n8nWorkflowsUrl", newUrl);
+    queryClient.invalidateQueries({ queryKey: ["n8nWorkflows"] });
+  };
+
+  const filteredWorkflows = workflows?.filter(workflow =>
+    workflow.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-black p-4 sm:p-6 lg:p-8 overflow-y-auto">
-      <div className="w-full max-w-4xl mb-8 text-center">
-        <img src="/logo.svg" alt="Logo" className="mx-auto h-16 w-auto mb-4" />
-        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
-          Workflows
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">
-          Select a workflow to get started.
-        </p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-background">
+      {/* Background glowing gradients */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative w-full max-w-md mb-8">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-        <Input
-          type="text"
-          placeholder="Search workflows..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <ScrollArea className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
+        {/* Header with Title and Settings Button */}
+        <div className="flex justify-between items-center w-full mb-6">
+          <div className="flex items-center space-x-2 mx-auto">
+            <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-14 w-14" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+              Dall-E Llama
+            </h1>
+          </div>
+          <div className="absolute right-6 top-6 flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsWorkflowSettingsOpen(true)} 
+            >
+              <Settings className="h-[1.2rem] w-[1.2rem]" />
+              <span className="sr-only">Settings</span>
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
+        
+        <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">
+          Select an AI Agent to Chat With
+        </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-        {filteredWorkflows.map((workflow) => (
-          <Card
-            key={workflow.id}
-            className="m-2 bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 ease-in-out hover:shadow-purple-glow"
-            onClick={() => handleSelectWorkflow(workflow.id)}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-semibold text-purple-700 dark:text-purple-300">
-                {workflow.name}
-              </CardTitle>
-              <span className="text-2xl">{workflow.icon}</span>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {workflow.description}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        {/* Search Input Field */}
+        <div className="relative w-full max-w-md mb-8 mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search agents by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-black/20 border border-white/30 rounded-md text-foreground placeholder:text-muted-foreground focus-visible:ring-purple-500"
+          />
+        </div>
+
+        {isLoading && (
+          <div className="flex items-center justify-center text-foreground">
+            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+            Loading workflows...
+          </div>
+        )}
+
+        {isError && (
+          <div className="text-red-500 text-center">
+            Failed to load AI agents. Please check the N8N server and URL ({n8nWorkflowsUrl}).
+            <p className="text-sm text-red-400 mt-2">{error?.message}</p>
+          </div>
+        )}
+
+        {!isLoading && !isError && filteredWorkflows.length === 0 && (
+          <div className="text-muted-foreground text-center">
+            No AI agents found matching your search.
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          {filteredWorkflows.map((workflow) => (
+            <Card 
+              key={workflow.id} 
+              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 ease-in-out hover:shadow-purple-glow"
+              onClick={() => handleSelectWorkflow(workflow.id)}
+            >
+              <CardHeader>
+                <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p>{workflow.description}</p>
+              </CardContent>
+              {/* Removed CardFooter and Button */}
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+
+      <WorkflowSettingsDialog
+        open={isWorkflowSettingsOpen}
+        onOpenChange={setIsWorkflowSettingsOpen}
+        currentN8nWorkflowsUrl={n8nWorkflowsUrl}
+        onSave={handleSaveWorkflowSettings}
+      />
     </div>
   );
 };
