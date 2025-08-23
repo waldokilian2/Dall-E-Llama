@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } => {
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Settings } from "lucide-react";
 import { showError } from "@/utils/toast";
@@ -138,7 +138,7 @@ const Workflows: React.FC = () => {
           {filteredWorkflows.map((workflow) => (
             <Card 
               key={workflow.id} 
-              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover:shadow-xl hover:ring-4 hover:ring-purple-500 hover:ring-offset-2 hover:ring-offset-background"
+              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]"
               onClick={() => handleSelectWorkflow(workflow.id)}
             >
               <CardHeader>
