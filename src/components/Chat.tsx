@@ -1,256 +1,363 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2, Sparkles, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Send, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react";
+import Message from "./Message";
 import { showError } from "@/utils/toast";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import SettingsDialog from "./SettingsDialog";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import llamaLogo from "@/assets/llama.png";
 
-interface Message {
-  id: string;
-  text: string;
+interface ChatMessage {
   sender: "user" | "ai";
-  timestamp: string;
+  text: string;
 }
 
-interface SuggestedAction {
-  label: string;
-  value: string;
+interface ChatProps {
+  n8nWebhookUrl: string;
 }
 
-const DEFAULT_N8N_CHAT_URL = "http://localhost:5678/webhook/chat";
+const DEFAULT_FILE_UPLOAD_ENABLED = false;
+const DEFAULT_RESPONSE_TIMEOUT_SECONDS = 120; // 2 minutes
 
-const Chat: React.FC = () => {
-  const { workflowId } = useParams<{ workflowId: string }>();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState<string>("");
-  const [currentSuggestedActions, setCurrentSuggestedActions] = useState<SuggestedAction[]>([]);
-  const [n8nChatUrl, setN8nChatUrl] = useState<string>(
-    localStorage.getItem("n8nChatUrl") || DEFAULT_N8N_CHAT_URL
+const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [fileUploadEnabled, setFileUploadEnabled] = useState<boolean>(
+    localStorage.getItem("fileUploadEnabled") === "true" || DEFAULT_FILE_UPLOAD_ENABLED
   );
+  const [responseTimeoutSeconds, setResponseTimeoutSeconds] = useState<number>(
+    parseInt(localStorage.getItem("responseTimeoutSeconds") || String(DEFAULT_RESPONSE_TIMEOUT_SECONDS), 10)
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // New state to track if chat has started
-  const [hasChatStarted, setHasChatStarted] = useState<boolean>(false);
+  const [sessionId, setSessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
-  const { data: initialSuggestedActions, isLoading: isLoadingInitialActions } = useQuery<SuggestedAction[], Error>({
-    queryKey: ["initialSuggestedActions", workflowId, n8nChatUrl],
-    queryFn: async () => {
-      const response = await fetch(`${n8nChatUrl}?workflowId=${workflowId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch initial suggested actions: ${response.statusText}`);
-      }
-      const data = await response.json();
-      return data.suggestedActions || [];
-    },
-    enabled: !hasChatStarted, // Only fetch initial actions if chat hasn't started
-    staleTime: Infinity,
-    cacheTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (!hasChatStarted) {
-      if (initialSuggestedActions && initialSuggestedActions.length > 0) {
-        setCurrentSuggestedActions(initialSuggestedActions);
-      } else {
-        // If no initial actions are returned, but chat hasn't started, show default "What can you do?"
-        setCurrentSuggestedActions([{ label: "What can you do?", value: "What can you do?" }]);
-      }
-    }
-  }, [initialSuggestedActions, hasChatStarted]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendMessageMutation = useMutation<any, Error, string>({
-    mutationFn: async (messageText: string) => {
-      const response = await fetch(n8nChatUrl, {
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSaveSettings = (newFileUploadEnabled: boolean, newResponseTimeout: number) => {
+    setFileUploadEnabled(newFileUploadEnabled);
+    localStorage.setItem("fileUploadEnabled", String(newFileUploadEnabled));
+    setResponseTimeoutSeconds(newResponseTimeout);
+    localStorage.setItem("responseTimeoutSeconds", String(newResponseTimeout));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const allowedTypes = ["text/plain", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (allowedTypes.includes(file.type)) {
+        setSelectedFile(file);
+      } else {
+        showError("Unsupported file type. Please upload .txt, .pdf, .doc, or .docx files.");
+        setSelectedFile(null);
+      }
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (input.trim() === "" && !selectedFile) return;
+
+    const userMessageText = input.trim();
+    let fileContent: string | undefined = undefined;
+    let fileName: string | undefined = undefined;
+    let fileType: string | undefined = undefined;
+
+    setCurrentSuggestedActions([]);
+
+    if (selectedFile) {
+      fileName = selectedFile.name;
+      fileType = selectedFile.type;
+
+      if (selectedFile.type === "text/plain") {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          fileContent = e.target?.result as string;
+          await sendPayload(userMessageText, fileContent, fileName, fileType);
+        };
+        reader.onerror = () => {
+          showError("Failed to read text file.");
+          setIsLoading(false);
+          setCurrentSuggestedActions(["What can you do?"]);
+        };
+        reader.readAsText(selectedFile);
+        return;
+      } else {
+        showError(`Note: For ${fileType} files, only the file name will be sent. Full content parsing is typically done server-side.`);
+      }
+    }
+
+    await sendPayload(userMessageText, fileContent, fileName, fileType);
+  };
+
+  const sendPayload = async (chatInput: string, fileContent?: string, fileName?: string, fileType?: string) => {
+    const userMessage: ChatMessage = {
+      sender: "user",
+      text: chatInput + (fileName ? ` (Attached: ${fileName})` : ""),
+    };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput("");
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setIsLoading(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), responseTimeoutSeconds * 1000);
+
+    try {
+      const rawData = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          workflowId,
-          message: messageText,
-          chatHistory: messages.map((msg) => ({ role: msg.sender === "user" ? "user" : "assistant", content: msg.text })),
+          sessionId: sessionId,
+          action: "sendMessage",
+          chatInput: chatInput,
+          ...(fileName && { file: { name: fileName, type: fileType, content: fileContent } }),
         }),
-      });
+        signal: controller.signal,
+      }).then(res => res.json());
 
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
+      clearTimeout(timeoutId);
+
+      console.log("Webhook raw response data:", rawData);
+
+      let aiMessageText = "No response from AI.";
+      let newSuggestedActions: string[] = ["What can you do?"];
+
+      if (rawData && typeof rawData === 'object' && rawData.output) {
+        const output = rawData.output;
+        if (output.message) {
+          aiMessageText = output.message;
+        }
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
+        }
+      } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+        const output = rawData[0].output;
+        if (output.message) {
+          aiMessageText = output.message;
+        }
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
+        }
+      } else {
+        console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
+        if (rawData?.message) {
+            aiMessageText = rawData.message;
+        }
+        if (Array.isArray(rawData?.suggestedActions) && rawData.suggestedActions.length > 0) {
+            newSuggestedActions = rawData.suggestedActions;
+        }
       }
-      return response.json();
-    },
-    onMutate: (messageText) => {
-      // Add user message to state immediately
-      const newUserMessage: Message = {
-        id: Date.now().toString(),
-        text: messageText,
-        sender: "user",
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, newUserMessage]);
-      setInputMessage("");
-      setCurrentSuggestedActions([]); // Clear suggested actions when user sends a message
-      setHasChatStarted(true); // Mark chat as started
-    },
-    onSuccess: (data) => {
-      const aiMessage: Message = {
-        id: Date.now().toString(),
-        text: data.response || "No response from AI.",
-        sender: "ai",
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setCurrentSuggestedActions(data.suggestedActions || []); // Update suggested actions from AI response
-    },
-    onError: (error) => {
-      showError(`Error sending message: ${error.message}`);
-      // Optionally, remove the last user message if sending failed
-      setMessages((prev) => prev.slice(0, prev.length - 1));
-    },
-  });
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      sendMessageMutation.mutate(inputMessage.trim());
+      const aiMessage: ChatMessage = { sender: "ai", text: aiMessageText };
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+      setCurrentSuggestedActions(newSuggestedActions);
+
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        console.error("Request timed out:", error);
+        showError(`Request timed out after ${responseTimeoutSeconds} seconds. Please try again or increase the timeout in settings.`);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { sender: "ai", text: "Sorry, the request timed out." },
+        ]);
+      } else {
+        console.error("Error sending message:", error);
+        showError("Failed to get a response from the AI agent. Please try again.");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
+        ]);
+      }
+      setCurrentSuggestedActions(["What can you do?"]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleChipClick = (action: SuggestedAction) => {
-    sendMessageMutation.mutate(action.value);
-    setHasChatStarted(true); // Mark chat as started when a chip is clicked
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !isLoading) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
+  const handleChipClick = (action: string) => {
+    setInput(action);
+  };
+
+  const handleNewChat = useCallback(() => {
+    setMessages([]);
+    setInput("");
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setSessionId(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    setCurrentSuggestedActions(["What can you do?"]);
+    setIsLoading(false);
+  }, []);
+
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-full bg-transparent">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border shadow-sm bg-card">
-        <h1 className="text-xl font-semibold">Chat with {decodeURIComponent(workflowId || "AI Agent")}</h1>
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
-          <X className="h-5 w-5" />
-          <span className="sr-only">Close Chat</span>
+      <div className="flex items-center p-4 border-b border-white/10 bg-transparent rounded-t-xl relative">
+        {/* Left-aligned New Chat button */}
+        <Button variant="ghost" size="icon" onClick={handleNewChat} className="absolute left-4 top-1/2 -translate-y-1/2">
+          <MessageSquarePlus className="h-[1.2rem] w-[1.2rem]" />
+          <span className="sr-only">New Chat</span>
+        </Button>
+
+        {/* Centered Title and Icon */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
+          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" /> {/* Llama logo, increased size */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+            Dall-E Llama
+          </h1>
+        </div>
+        {/* Right-aligned controls */}
+        <div className="ml-auto flex items-center space-x-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span className="sr-only">Back to Workflows</span>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
+            <Settings className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Settings</span>
+          </Button>
+          <ThemeToggle />
+        </div>
+      </div>
+
+      {/* Message Area */}
+      <div className="flex-1 p-4 overflow-hidden">
+        <ScrollArea className="h-full w-full pr-4">
+          <div className="flex flex-col space-y-2">
+            {messages.length === 0 && (
+              <div className="text-center text-muted-foreground mt-10">
+                Start a conversation with your AI agent!
+              </div>
+            )}
+            {messages.map((msg, index) => (
+              <Message key={index} sender={msg.sender} text={msg.text} />
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="max-w-[70%] p-3 rounded-lg shadow-md bg-gray-700/30 text-foreground rounded-bl-none animate-pulse border border-gray-600/50">
+                  Typing...
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Suggested Actions Chips */}
+      {currentSuggestedActions.length > 0 && (
+        <div className="p-4 pt-0 flex flex-wrap gap-2 justify-center">
+          {currentSuggestedActions.map((action, index) => (
+            <Badge
+              key={index}
+              className="cursor-pointer text-foreground text-base px-4 py-2 rounded-full shadow-lg backdrop-filter backdrop-blur-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-colors duration-200"
+              onClick={() => handleChipClick(action)}
+            >
+              {action}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className="p-4 border-t border-white/10 bg-transparent flex items-center space-x-2 rounded-b-xl">
+        {fileUploadEnabled && (
+          <>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".txt,.pdf,.doc,.docx"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Paperclip className="h-5 w-5" />
+              <span className="sr-only">Attach file</span>
+            </Button>
+          </>
+        )}
+        <div className="flex-1 relative">
+          <Input
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="w-full bg-white/10 text-foreground border-white/20 placeholder:text-muted-foreground focus-visible:ring-offset-transparent focus-visible:ring-purple-500 pr-10"
+          />
+          {selectedFile && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1 text-sm text-muted-foreground bg-background/50 rounded-full px-2 py-1">
+              <span>{selectedFile.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRemoveFile}
+                className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+              >
+                <XCircle className="h-4 w-4" />
+                <span className="sr-only">Remove file</span>
+              </Button>
+            </div>
+          )}
+        </div>
+        <Button onClick={handleSendMessage} disabled={isLoading || (input.trim() === "" && !selectedFile)} className="bg-purple-600 hover:bg-purple-700 text-white">
+          <Send className="h-5 w-5" />
+          <span className="sr-only">Send message</span>
         </Button>
       </div>
 
-      {/* Chat Messages Area */}
-      <ScrollArea className="flex-1 p-4 custom-scrollbar">
-        <div className="max-w-3xl mx-auto space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex items-start gap-3 ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {message.sender === "ai" && (
-                <Avatar>
-                  <AvatarImage src="/placeholder-avatar.jpg" alt="AI Avatar" />
-                  <AvatarFallback>AI</AvatarFallback>
-                </Avatar>
-              )}
-              <Card
-                className={`p-3 max-w-[70%] ${
-                  message.sender === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-none"
-                    : "bg-muted rounded-bl-none"
-                }`}
-              >
-                <Markdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
-                        <SyntaxHighlighter
-                          style={coldarkDark}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {message.text}
-                </Markdown>
-              </Card>
-              {message.sender === "user" && (
-                <Avatar>
-                  <AvatarImage src="/placeholder-avatar.jpg" alt="User Avatar" />
-                  <AvatarFallback>You</AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-
-      {/* Suggested Actions and Input */}
-      <div className="p-4 border-t border-border bg-card">
-        {currentSuggestedActions.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4 max-w-3xl mx-auto">
-            {currentSuggestedActions.map((action, index) => (
-              <Badge
-                key={index}
-                className="cursor-pointer text-foreground text-base px-4 py-2 rounded-full shadow-lg backdrop-filter backdrop-blur-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-colors duration-200"
-                onClick={() => handleChipClick(action)}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {action.label}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
-            placeholder="Type your message..."
-            className="flex-1 bg-muted focus-visible:ring-purple-500"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={sendMessageMutation.isPending}
-          />
-          <Button onClick={handleSendMessage} disabled={sendMessageMutation.isPending}>
-            {sendMessageMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            <span className="sr-only">Send</span>
-          </Button>
-        </div>
-      </div>
+      <SettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        currentFileUploadEnabled={fileUploadEnabled}
+        currentResponseTimeout={responseTimeoutSeconds}
+        onSave={handleSaveSettings}
+      />
     </div>
   );
 };
