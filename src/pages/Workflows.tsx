@@ -8,7 +8,7 @@ import { Brain, Loader2, Search, Settings } from "lucide-react";
 import { showError } from "@/utils/toast";
 import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Workflow {
   id: string;
@@ -102,7 +102,7 @@ const Workflows: React.FC = () => {
         </h2>
 
         {/* Search Input Field */}
-        <div className="relative w-full max-w-md mb-8">
+        <div className="relative w-full max-w-md mb-8 mx-auto"> {/* Added mx-auto here */}
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
