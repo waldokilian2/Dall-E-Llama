@@ -10,7 +10,6 @@ import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import llamaLogo from "@/assets/llama.png";
-import { useTheme } from "@/components/theme-provider"; // Import useTheme
 
 interface Workflow {
   id: string;
@@ -28,9 +27,6 @@ const Workflows: React.FC = () => {
   const [n8nWorkflowsUrl, setN8nWorkflowsUrl] = useState<string>(
     localStorage.getItem("n8nWorkflowsUrl") || DEFAULT_N8N_WORKFLOWS_URL
   );
-
-  const { theme } = useTheme(); // Get current theme
-  const isDarkMode = theme === 'dark';
 
   const { data: workflows, isLoading, isError, error } = useQuery<Workflow[], Error>({
     queryKey: ["n8nWorkflows", n8nWorkflowsUrl],
@@ -156,13 +152,9 @@ const Workflows: React.FC = () => {
               </Card>
             ))}
           </div>
-          {/* Fade effect at the bottom of the ScrollArea's viewport */}
-          <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none rounded-b-xl"
-               style={{
-                 background: `linear-gradient(to top, ${isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(229, 231, 235, 0.5)'} 0%, transparent 100%)`
-               }}
-          ></div>
         </ScrollArea>
+        {/* Fade effect at the bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none rounded-b-xl"></div>
       </div>
 
       <WorkflowSettingsDialog
