@@ -78,6 +78,9 @@ const Workflows: React.FC = () => {
 
       {/* Wrapper for ScrollArea and fade effect */}
       <div className="relative z-10 w-full max-w-4xl mx-auto rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
+        {/* Fade effect at the top */}
+        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background to-transparent pointer-events-none rounded-t-xl z-20"></div>
+        
         <ScrollArea className="p-8 flex flex-col items-center custom-scrollbar max-h-[90vh]">
           {/* Header with Title and Settings Button */}
           <div className="flex justify-between items-center w-full mb-6">
@@ -154,7 +157,7 @@ const Workflows: React.FC = () => {
           </div>
         </ScrollArea>
         {/* Fade effect at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none rounded-b-xl"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none rounded-b-xl z-20"></div>
       </div>
 
       <WorkflowSettingsDialog
