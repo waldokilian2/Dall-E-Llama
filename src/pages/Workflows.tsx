@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Settings } from "lucide-react";
@@ -136,21 +136,17 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {filteredWorkflows.map((workflow) => (
-            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col">
+            <Card 
+              key={workflow.id} 
+              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer hover:shadow-xl transition-shadow duration-200"
+              onClick={() => handleSelectWorkflow(workflow.id)}
+            >
               <CardHeader>
                 <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p>{workflow.description}</p>
               </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={() => handleSelectWorkflow(workflow.id)} 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  Select Agent
-                </Button>
-              </CardFooter>
             </Card>
           ))}
         </div>
