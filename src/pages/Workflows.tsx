@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Settings } from "lucide-react"; // Removed Brain icon
+import { Loader2, Search, Settings } from "lucide-react";
 import { showError } from "@/utils/toast";
 import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -76,11 +76,18 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
+      {/* Llama logo peeking out */}
+      <img 
+        src={llamaLogo} 
+        alt="Dall-E Llama Logo" 
+        className="absolute -top-20 -left-20 w-64 h-64 opacity-20 z-[5] pointer-events-none" 
+      />
+
       <ScrollArea className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
         {/* Header with Title and Settings Button */}
         <div className="flex justify-between items-center w-full mb-6">
           <div className="flex items-center space-x-2 mx-auto">
-            <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" /> {/* Llama logo */}
+            {/* Removed llamaLogo from here */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
               Dall-E Llama
             </h1>
@@ -103,7 +110,7 @@ const Workflows: React.FC = () => {
         </h2>
 
         {/* Search Input Field */}
-        <div className="relative w-full max-w-md mb-8 mx-auto"> {/* Added mx-auto here */}
+        <div className="relative w-full max-w-md mb-8 mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
