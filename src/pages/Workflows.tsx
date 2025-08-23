@@ -146,7 +146,7 @@ const Workflows: React.FC = () => {
               <CardFooter>
                 <Button 
                   onClick={() => handleSelectWorkflow(workflow.id)} 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 ease-in-out hover:shadow-purple-glow"
                 >
                   Select Agent
                 </Button>
