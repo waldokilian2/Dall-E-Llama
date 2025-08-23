@@ -76,89 +76,81 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      {/* Wrapper for ScrollArea and fade effect */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl overflow-hidden">
-        {/* Fade effect at the top */}
-        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background to-transparent pointer-events-none rounded-t-xl z-20"></div>
+      <ScrollArea className="relative z-10 w-full max-w-4xl p-8 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
+        {/* Header with Title and Settings Button */}
+        <div className="flex justify-between items-center w-full mb-6">
+          <div className="flex items-center space-x-2 mx-auto">
+            <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-14 w-14" />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+              Dall-E Llama
+            </h1>
+          </div>
+          <div className="absolute right-6 top-6 flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsWorkflowSettingsOpen(true)} 
+            >
+              <Settings className="h-[1.2rem] w-[1.2rem]" />
+              <span className="sr-only">Settings</span>
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
         
-        <ScrollArea className="p-8 flex flex-col items-center custom-scrollbar max-h-[90vh]">
-          {/* Header with Title and Settings Button */}
-          <div className="flex justify-between items-center w-full mb-6">
-            <div className="flex items-center space-x-2 mx-auto">
-              <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-14 w-14" />
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
-                Dall-E Llama
-              </h1>
-            </div>
-            <div className="absolute right-6 top-6 flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsWorkflowSettingsOpen(true)} 
-              >
-                <Settings className="h-[1.2rem] w-[1.2rem]" />
-                <span className="sr-only">Settings</span>
-              </Button>
-              <ThemeToggle />
-            </div>
+        <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">
+          Select an AI Agent to Chat With
+        </h2>
+
+        {/* Search Input Field */}
+        <div className="relative w-full max-w-md mb-8 mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search agents by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-black/20 border border-white/30 rounded-md text-foreground placeholder:text-muted-foreground focus-visible:ring-purple-500"
+          />
+        </div>
+
+        {isLoading && (
+          <div className="flex items-center justify-center text-foreground">
+            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+            Loading workflows...
           </div>
-          
-          <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">
-            Select an AI Agent to Chat With
-          </h2>
+        )}
 
-          {/* Search Input Field */}
-          <div className="relative w-full max-w-md mb-8 mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search agents by name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-black/20 border border-white/30 rounded-md text-foreground placeholder:text-muted-foreground focus-visible:ring-purple-500"
-            />
+        {isError && (
+          <div className="text-red-500 text-center">
+            Failed to load AI agents. Please check the N8N server and URL ({n8nWorkflowsUrl}).
+            <p className="text-sm text-red-400 mt-2">{error?.message}</p>
           </div>
+        )}
 
-          {isLoading && (
-            <div className="flex items-center justify-center text-foreground">
-              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-              Loading workflows...
-            </div>
-          )}
-
-          {isError && (
-            <div className="text-red-500 text-center">
-              Failed to load AI agents. Please check the N8N server and URL ({n8nWorkflowsUrl}).
-              <p className="text-sm text-red-400 mt-2">{error?.message}</p>
-            </div>
-          )}
-
-          {!isLoading && !isError && filteredWorkflows.length === 0 && (
-            <div className="text-muted-foreground text-center">
-              No AI agents found matching your search.
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-            {filteredWorkflows.map((workflow) => (
-              <Card 
-                key={workflow.id} 
-                className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover-sparkle-glow"
-                onClick={() => handleSelectWorkflow(workflow.id)}
-              >
-                <CardHeader>
-                  <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p>{workflow.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+        {!isLoading && !isError && filteredWorkflows.length === 0 && (
+          <div className="text-muted-foreground text-center">
+            No AI agents found matching your search.
           </div>
-        </ScrollArea>
-        {/* Fade effect at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none rounded-b-xl z-20"></div>
-      </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          {filteredWorkflows.map((workflow) => (
+            <Card 
+              key={workflow.id} 
+              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover-sparkle-glow"
+              onClick={() => handleSelectWorkflow(workflow.id)}
+            >
+              <CardHeader>
+                <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p>{workflow.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
 
       <WorkflowSettingsDialog
         open={isWorkflowSettingsOpen}
