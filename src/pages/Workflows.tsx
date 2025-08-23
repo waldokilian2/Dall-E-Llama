@@ -80,7 +80,7 @@ const Workflows: React.FC = () => {
         {/* Header with Title and Settings Button */}
         <div className="flex justify-between items-center w-full mb-6">
           <div className="flex items-center space-x-2 mx-auto">
-            <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-14 w-14" /> {/* Llama logo, increased size */}
+            <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-14 w-14" />
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
               Dall-E Llama
             </h1>
@@ -138,7 +138,7 @@ const Workflows: React.FC = () => {
           {filteredWorkflows.map((workflow) => (
             <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col">
               <CardHeader>
-                <CardTitle className="text-purple-300">{workflow.name}</CardTitle>
+                <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p>{workflow.description}</p>
