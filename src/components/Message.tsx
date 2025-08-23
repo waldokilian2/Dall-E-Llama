@@ -46,7 +46,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
             remarkPlugins={[remarkGfm]}
             components={{
               a: ({ node, ...props }) => (
-                <a {...props} className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer" />
+                <a {...props} className="text-purple-400 hover:underline break-words" target="_blank" rel="noopener noreferrer" />
               ),
             }}
           >
