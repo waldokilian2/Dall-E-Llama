@@ -44,6 +44,11 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
         <div className="prose prose-invert max-w-none"> {/* Apply prose styles here */}
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ node, ...props }) => (
+                <a {...props} className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer" />
+              ),
+            }}
           >
             {text}
           </ReactMarkdown>
