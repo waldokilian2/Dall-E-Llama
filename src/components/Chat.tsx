@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react"; // Removed Brain icon
+import { Send, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react";
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import SettingsDialog from "./SettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
-import llamaLogo from "@/assets/llama.png"; // Import the llama logo
+import { ThemeToggle } from "@/components/ThemeToggle";
+import llamaLogo from "@/assets/llama.png";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -17,7 +17,7 @@ interface ChatMessage {
 }
 
 interface ChatProps {
-  n8nWebhookUrl: string; // Now received as a prop
+  n8nWebhookUrl: string;
 }
 
 const DEFAULT_FILE_UPLOAD_ENABLED = false;
@@ -240,14 +240,14 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
-          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-10 w-10" /> {/* Llama logo */}
+          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" /> {/* Llama logo, increased size */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
         </div>
         {/* Right-aligned controls */}
         <div className="ml-auto flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}> {/* Go back to workflow selection */}
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
             <span className="sr-only">Back to Workflows</span>
           </Button>
@@ -255,7 +255,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
             <Settings className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">Settings</span>
           </Button>
-          <ThemeToggle /> {/* Theme toggle */}
+          <ThemeToggle />
         </div>
       </div>
 
