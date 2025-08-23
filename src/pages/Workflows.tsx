@@ -8,6 +8,7 @@ import { Brain, Loader2, Search, Settings } from "lucide-react";
 import { showError } from "@/utils/toast";
 import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
 
 interface Workflow {
   id: string;
@@ -74,7 +75,7 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto mx-auto custom-scrollbar">
+      <ScrollArea className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
         {/* Header with Title and Settings Button */}
         <div className="flex justify-between items-center w-full mb-6">
           <div className="flex items-center space-x-2 mx-auto">
@@ -152,7 +153,7 @@ const Workflows: React.FC = () => {
             </Card>
           ))}
         </div>
-      </div>
+      </ScrollArea>
 
       <WorkflowSettingsDialog
         open={isWorkflowSettingsOpen}
