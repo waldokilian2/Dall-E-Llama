@@ -138,7 +138,7 @@ const Workflows: React.FC = () => {
           {filteredWorkflows.map((workflow) => (
             <Card 
               key={workflow.id} 
-              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]"
+              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 hover:shadow-[inset_0_0_25px_rgba(168,85,247,0.7)]"
               onClick={() => handleSelectWorkflow(workflow.id)}
             >
               <CardHeader>
