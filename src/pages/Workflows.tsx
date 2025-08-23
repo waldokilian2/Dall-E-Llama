@@ -134,7 +134,7 @@ const Workflows: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
           {filteredWorkflows.map((workflow) => (
             <Card 
               key={workflow.id} 
