@@ -136,18 +136,21 @@ const Workflows: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {filteredWorkflows.map((workflow) => (
-            <Card 
-              key={workflow.id} 
-              className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col cursor-pointer transition-all duration-300 ease-in-out hover:shadow-purple-glow"
-              onClick={() => handleSelectWorkflow(workflow.id)}
-            >
+            <Card key={workflow.id} className="bg-white/50 dark:bg-black/30 border border-white/30 text-foreground shadow-lg flex flex-col">
               <CardHeader>
                 <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p>{workflow.description}</p>
               </CardContent>
-              {/* Removed CardFooter and Button */}
+              <CardFooter>
+                <Button 
+                  onClick={() => handleSelectWorkflow(workflow.id)} 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Select Agent
+                </Button>
+              </CardFooter>
             </Card>
           ))}
         </div>
