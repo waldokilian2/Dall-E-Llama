@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Brain, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react";
+import { Send, Settings, Paperclip, XCircle, MessageSquarePlus } from "lucide-react"; // Removed Brain icon
 import Message from "./Message";
 import { showError } from "@/utils/toast";
 import SettingsDialog from "./SettingsDialog";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
+import llamaLogo from "@/assets/llama.png"; // Import the llama logo
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -239,7 +240,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
-          <Brain className="h-10 w-10 text-purple-400" />
+          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-10 w-10" /> {/* Llama logo */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
