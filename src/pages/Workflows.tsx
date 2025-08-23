@@ -76,7 +76,7 @@ const Workflows: React.FC = () => {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <ScrollArea className="relative z-10 w-full max-w-4xl p-12 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
+      <ScrollArea className="relative z-10 w-full max-w-4xl p-6 rounded-xl backdrop-filter backdrop-blur-xl bg-gray-200/50 dark:bg-white/10 border border-white/20 shadow-2xl flex flex-col items-center max-h-[90vh] mx-auto">
         {/* Header with Title and Settings Button */}
         <div className="flex justify-between items-center w-full mb-6">
           <div className="flex items-center space-x-2 mx-auto">
@@ -85,7 +85,7 @@ const Workflows: React.FC = () => {
               Dall-E Llama
             </h1>
           </div>
-          <div className="absolute right-12 top-12 flex items-center space-x-2">
+          <div className="absolute right-6 top-6 flex items-center space-x-2">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -134,7 +134,7 @@ const Workflows: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {filteredWorkflows.map((workflow) => (
             <Card 
               key={workflow.id} 
