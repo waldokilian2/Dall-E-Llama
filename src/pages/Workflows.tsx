@@ -122,9 +122,9 @@ const Workflows: React.FC = () => {
         )}
 
         {isError && (
-          <div className="text-red-500 text-center">
+          <div className="text-center ">
             Failed to load AI agents. Please check the N8N server and URL ({n8nWorkflowsUrl}).
-            <p className="text-sm text-red-400 mt-2">{error?.message}</p>
+            <p className="text-sm mt-2">{error?.message}</p>
           </div>
         )}
 
