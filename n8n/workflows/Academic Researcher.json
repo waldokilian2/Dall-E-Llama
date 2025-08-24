@@ -1,5 +1,5 @@
 {
-  "name": "Code documentation expert",
+  "name": "Academic Researcher",
   "nodes": [
     {
       "parameters": {
@@ -7,16 +7,16 @@
         "text": "={{ $json.chatInput }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an AI assistant specializing in retrieving and presenting documentation for code libraries using Context7 tools.\n\nCore Responsibilities\n\nLibrary Resolution\n\nAlways begin by resolving the user’s query into a valid Context7-compatible library ID.\n\nUse resolve-library-id unless the user explicitly provides a library ID in the format /org/project or /org/project/version.\n\nSelect the best match based on:\n\nExact or closest name match\n\nRelevance of description to the user’s intent\n\nDocumentation coverage (more code snippets = higher priority)\n\nTrust score (prefer authoritative sources, 7–10)\n\nIf multiple matches exist, mention them but proceed with the strongest candidate.\n\nIf no good match exists, explain this and suggest refinements.\n\nDocumentation Retrieval\n\nUse get-library-docs only after resolving the library ID.\n\nProvide up-to-date documentation for the requested library, including:\n\nOverview / description\n\nInstallation instructions (if available)\n\nAPI references and usage examples\n\nLinks to additional resources (if provided)\n\nExpected Behavior\n\nClarify vague or ambiguous requests before proceeding.\n\nPresent documentation in a clear, structured format with headings, bullet points, or code blocks.\n\nAvoid fabricating content—only return verified documentation from the tools.\n\nIf the requested library does not exist, politely inform the user and suggest alternatives.\n\nStyle Guidelines\n\nMaintain a helpful, developer-friendly tone.\n\nKeep explanations concise but informative.\n\nUse spacing to isolate code snippets, commands, and library names.\n\nWhen possible, highlight key usage patterns and practical tips from the documentation.\n\n*If the user asks what you can do, simply state that you are able to find documentation for any library that they provide.\n\n***IMPORTANT***\n* Make sure your output is Human readable markdown format"
+          "systemMessage": "You are an AI academic research assistant with expertise in literature review, citation analysis, and scholarly exploration.\nYou have access to a set of MCP tools that allow you to search, retrieve, and analyze academic papers and authors.\n\nCore Responsibilities\n\nResearch Support\n\nHelp users discover relevant academic papers, authors, and citation networks.\n\nProvide summaries, comparisons, links and syntheses of findings from retrieved papers depending on what the user asked for.\nTool Usage\n\nUse papers-search-basic for broad topic searches.\n\nUse papers-search-advanced for refined searches (date range, keywords, authors, venues).\n\nUse papers-match when a user provides a title or partial title.\n\nUse papers-get to retrieve metadata, abstracts, or detailed information.\n\nUse papers-citations to identify works that cite a paper.\n\nUse papers-references to retrieve the references cited within a paper.\n\nUse authors-search to locate authors by name or affiliation.\n\nUse authors-papers to fetch a specific author’s publications.\n\nUse papers-batch for retrieving multiple papers by IDs.\n\nUse analysis-citation-network to explore the influence and connectivity of a paper in the literature.\n\nExpected Behavior\n\nPresent results in a clear, structured way (title, authors, year, abstract, link).\n\nAvoid fabricating papers, authors, or citations—always rely on tool outputs.\n\nStyle Guidelines\nMaintain a professional, academic tone.\n\n***IMPORTANT***\n* Make sure your output is Human readable markdown format and limit results to 5 papers\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
         240,
-        160
+        96
       ],
-      "id": "198929f5-b8e4-44f9-9176-c22c68e3fe60",
+      "id": "630ebb88-fefd-4d09-98c1-640ccc73fd3c",
       "name": "AI Agent"
     },
     {
@@ -27,9 +27,9 @@
       "typeVersion": 1,
       "position": [
         176,
-        384
+        320
       ],
-      "id": "58fd7ff3-f397-47cc-9f39-48434c7b31b8",
+      "id": "c8211546-d9c0-41ab-b6d3-4df6658a3257",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
@@ -40,7 +40,7 @@
     },
     {
       "parameters": {
-        "content": "An AI assistant that retrieves up-to-date documentation for code libraries. It can resolve package names to the correct library ID, fetch official docs, and present clear installation steps, API references, and usage examples to help developers quickly understand and use libraries."
+        "content": "An AI research assistant that helps discover, analyze, and summarize academic literature. It can search papers and authors, retrieve citations and references, and map citation networks to support literature reviews and scholarly exploration."
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -48,7 +48,7 @@
         176,
         -176
       ],
-      "id": "00d01af8-7fee-46d2-9086-7ebe68838288",
+      "id": "5245859d-3ab9-4068-9403-64c07d23ca27",
       "name": "Sticky Note"
     },
     {
@@ -63,11 +63,11 @@
       "typeVersion": 1.3,
       "position": [
         -48,
-        160
+        96
       ],
-      "id": "a87873a6-2e04-479c-88dc-8fd6bfa12f7f",
+      "id": "61fa5e1f-983d-43b8-9264-bfc55a475c7f",
       "name": "When chat message received",
-      "webhookId": "4392c56c-b2d8-4f41-b27f-1b44d8e4d21e"
+      "webhookId": "cd7f8ca4-942c-4f36-b2fa-0e2c7047fe6c"
     },
     {
       "parameters": {
@@ -77,29 +77,37 @@
       "typeVersion": 1.3,
       "position": [
         304,
-        384
+        320
       ],
-      "id": "d2b6f9b2-afd1-42b5-a700-ccf28cf48aa7",
+      "id": "c12dce9b-1db4-4046-ab47-9ebb178c8ec0",
       "name": "Simple Memory"
     },
     {
       "parameters": {
-        "endpointUrl": "https://server.smithery.ai/@upstash/context7-mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "endpointUrl": "https://server.smithery.ai/@hamid-vakilzadeh/mcpsemanticscholar/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
         "serverTransport": "httpStreamable",
         "include": "selected",
         "includeTools": [
-          "resolve-library-id",
-          "get-library-docs"
+          "papers-search-basic",
+          "papers-search-advanced",
+          "papers-match",
+          "papers-get",
+          "papers-citations",
+          "papers-references",
+          "authors-search",
+          "authors-papers",
+          "papers-batch",
+          "analysis-citation-network"
         ]
       },
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
       "typeVersion": 1.1,
       "position": [
         432,
-        384
+        320
       ],
-      "id": "080f7d25-f547-470b-86be-86cc03f066e8",
-      "name": "Context 7"
+      "id": "5da2fa52-f534-42dc-9681-c2a170f100c2",
+      "name": "MCP Client"
     },
     {
       "parameters": {
@@ -110,9 +118,9 @@
       "typeVersion": 1,
       "position": [
         720,
-        528
+        464
       ],
-      "id": "a2572b72-61b3-481d-a918-735327895131",
+      "id": "b0bf77aa-8cdb-44d6-ae6d-60eb21de06f4",
       "name": "Google Gemini Chat Model2",
       "credentials": {
         "googlePalmApi": {
@@ -134,10 +142,33 @@
       "typeVersion": 1.2,
       "position": [
         640,
-        304
+        240
       ],
-      "id": "55afad45-846d-4568-b40e-a0cdf3bb4b04",
+      "id": "41e616b1-b919-4d65-9e16-8a177561d583",
       "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9378efb7-a48a-41fa-895d-4dce3eb035cf",
+              "name": "message",
+              "value": "={{ typeof $json.output === \"string\" ? $json.output : JSON.stringify($json.output) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        -64
+      ],
+      "id": "91934246-f3e8-4a06-b317-acea52b5c0f8",
+      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -163,9 +194,9 @@
       "typeVersion": 3.4,
       "position": [
         1216,
-        160
+        96
       ],
-      "id": "6f754eed-62bf-43f9-b84b-e4bb527ed51f",
+      "id": "07180f7f-d265-459e-9c97-f41072f9df76",
       "name": "Edit Fields1",
       "executeOnce": true
     },
@@ -179,33 +210,10 @@
       "typeVersion": 3.2,
       "position": [
         992,
-        160
+        96
       ],
-      "id": "5c67d3ac-2d74-47af-80c4-e679aa2b1fd6",
+      "id": "7f575b14-9c05-4542-9afe-a63976a09972",
       "name": "Merge"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "9378efb7-a48a-41fa-895d-4dce3eb035cf",
-              "name": "message",
-              "value": "={{ typeof $json.output === \"string\" ? $json.output : JSON.stringify($json.output) }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        704,
-        0
-      ],
-      "id": "f07ffb2f-127c-4066-a4c9-985f92b33944",
-      "name": "Edit Fields2"
     }
   ],
   "pinData": {},
@@ -214,7 +222,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields2",
+            "node": "Edit Fields",
             "type": "main",
             "index": 0
           },
@@ -259,7 +267,7 @@
         ]
       ]
     },
-    "Context 7": {
+    "MCP Client": {
       "ai_tool": [
         [
           {
@@ -292,22 +300,22 @@
         ]
       ]
     },
-    "Merge": {
+    "Edit Fields": {
       "main": [
         [
           {
-            "node": "Edit Fields1",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Edit Fields2": {
+    "Merge": {
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Edit Fields1",
             "type": "main",
             "index": 0
           }
@@ -319,12 +327,12 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4c69d3de-f7be-41ca-9cee-c793714ad0c8",
+  "versionId": "647ef25f-9aa6-4b65-8a91-ef6fbe522d72",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
   },
-  "id": "zAT0osRYSwA3pecM",
+  "id": "1etEUUC88uCPfp6k",
   "tags": [
     {
       "createdAt": "2025-08-22T15:55:34.834Z",

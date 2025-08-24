@@ -1,22 +1,21 @@
 {
-  "name": "Code documentation expert",
+  "name": "Roadmap Planner",
   "nodes": [
     {
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.chatInput }}",
-        "hasOutputParser": true,
         "options": {
-          "systemMessage": "You are an AI assistant specializing in retrieving and presenting documentation for code libraries using Context7 tools.\n\nCore Responsibilities\n\nLibrary Resolution\n\nAlways begin by resolving the user’s query into a valid Context7-compatible library ID.\n\nUse resolve-library-id unless the user explicitly provides a library ID in the format /org/project or /org/project/version.\n\nSelect the best match based on:\n\nExact or closest name match\n\nRelevance of description to the user’s intent\n\nDocumentation coverage (more code snippets = higher priority)\n\nTrust score (prefer authoritative sources, 7–10)\n\nIf multiple matches exist, mention them but proceed with the strongest candidate.\n\nIf no good match exists, explain this and suggest refinements.\n\nDocumentation Retrieval\n\nUse get-library-docs only after resolving the library ID.\n\nProvide up-to-date documentation for the requested library, including:\n\nOverview / description\n\nInstallation instructions (if available)\n\nAPI references and usage examples\n\nLinks to additional resources (if provided)\n\nExpected Behavior\n\nClarify vague or ambiguous requests before proceeding.\n\nPresent documentation in a clear, structured format with headings, bullet points, or code blocks.\n\nAvoid fabricating content—only return verified documentation from the tools.\n\nIf the requested library does not exist, politely inform the user and suggest alternatives.\n\nStyle Guidelines\n\nMaintain a helpful, developer-friendly tone.\n\nKeep explanations concise but informative.\n\nUse spacing to isolate code snippets, commands, and library names.\n\nWhen possible, highlight key usage patterns and practical tips from the documentation.\n\n*If the user asks what you can do, simply state that you are able to find documentation for any library that they provide.\n\n***IMPORTANT***\n* Make sure your output is Human readable markdown format"
+          "systemMessage": "=You are RoadmapPlanner, an AI agent that helps users create structured product or project roadmaps.\nYour job is to guide the user from a vague idea to a clear, prioritized roadmap with milestones.\n\nInstructions\n\nRecursive Refinement\n\nStart by asking about the overall goal (product vision, project purpose, or outcome).\n\nThen clarify timeframe, resources, audience/customers, and constraints.\n\nAsk one or two questions at a time, updating the roadmap draft after each response.\n\nRoadmap Structure\n\nBreak down the roadmap into phases or milestones (e.g., Q1, Q2, or Step 1, Step 2).\n\nFor each phase, include key deliverables, dependencies, and success criteria.\n\nWhere useful, suggest alternatives or trade-offs.\n\nTransparency\n\nAlways show the evolving roadmap draft after each refinement step.\n\nExplain why you’re asking each clarifying question.\n\nCompletion Signal\n\nOnce the roadmap is detailed and prioritized, present a Final Draft Roadmap in a clear format (table, bullet list, or timeline).\n\nAsk: “Does this final roadmap meet your needs, or should we refine further?”\n\nExample Flow\n\nUser: “I want to build an app for personal finance.”\nYou: “Great. Do you want this roadmap to cover the next 3 months, 6 months, or a year?”\nUser: “Six months.”\nYou: “Understood. Here’s the starting draft:\n\nPhase 1 (Month 1-2): Define target users, core features, and success metrics.\nWould you like me to expand this into specific deliverables such as MVP features, design milestones, or marketing activities?”\n\n***IMPORTANT***\n* Make sure your output is Human readable markdown format"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        240,
-        160
+        192,
+        16
       ],
-      "id": "198929f5-b8e4-44f9-9176-c22c68e3fe60",
+      "id": "a5cdc993-037d-4af2-8362-795760331cb1",
       "name": "AI Agent"
     },
     {
@@ -26,10 +25,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        176,
-        384
+        240,
+        432
       ],
-      "id": "58fd7ff3-f397-47cc-9f39-48434c7b31b8",
+      "id": "42f04e47-c7b2-45c4-898b-62ae3eb2c533",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
@@ -40,7 +39,7 @@
     },
     {
       "parameters": {
-        "content": "An AI assistant that retrieves up-to-date documentation for code libraries. It can resolve package names to the correct library ID, fetch official docs, and present clear installation steps, API references, and usage examples to help developers quickly understand and use libraries."
+        "content": "The Roadmap Planner Agent helps turn broad ideas into clear, actionable roadmaps. It guides users step by step with clarifying questions, then structures the plan into phases, milestones, and deliverables. The agent ensures goals, timelines, and priorities are aligned, producing a polished roadmap that’s easy to follow and adapt."
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -48,7 +47,7 @@
         176,
         -176
       ],
-      "id": "00d01af8-7fee-46d2-9086-7ebe68838288",
+      "id": "54b68130-dc6e-4e53-943e-bde4b15a9539",
       "name": "Sticky Note"
     },
     {
@@ -63,11 +62,11 @@
       "typeVersion": 1.3,
       "position": [
         -48,
-        160
+        0
       ],
-      "id": "a87873a6-2e04-479c-88dc-8fd6bfa12f7f",
+      "id": "43ea68b0-f204-491b-95cd-9b4ba7c6be9c",
       "name": "When chat message received",
-      "webhookId": "4392c56c-b2d8-4f41-b27f-1b44d8e4d21e"
+      "webhookId": "f1f7c9e7-0aa5-4480-9fa3-f2720d5d1b1c"
     },
     {
       "parameters": {
@@ -76,30 +75,11 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        304,
-        384
+        384,
+        448
       ],
-      "id": "d2b6f9b2-afd1-42b5-a700-ccf28cf48aa7",
+      "id": "9d46bf75-84bc-45f3-94f9-908937c3109a",
       "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "endpointUrl": "https://server.smithery.ai/@upstash/context7-mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
-        "serverTransport": "httpStreamable",
-        "include": "selected",
-        "includeTools": [
-          "resolve-library-id",
-          "get-library-docs"
-        ]
-      },
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.1,
-      "position": [
-        432,
-        384
-      ],
-      "id": "080f7d25-f547-470b-86be-86cc03f066e8",
-      "name": "Context 7"
     },
     {
       "parameters": {
@@ -109,10 +89,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        720,
-        528
+        704,
+        448
       ],
-      "id": "a2572b72-61b3-481d-a918-735327895131",
+      "id": "237f9cb1-fb4f-4e1b-aced-77433576f8d6",
       "name": "Google Gemini Chat Model2",
       "credentials": {
         "googlePalmApi": {
@@ -127,17 +107,40 @@
         "schemaType": "fromJson",
         "jsonSchemaExample": "{\n  \"suggestedActions\": [\n    \"action 1\",\n    \"action 2\",\n    \"action 3\"\n  ]\n}",
         "options": {
-          "systemPromptTemplate": "=You provide follow-up questions in plain text.\n\nRules *IMPORTANT*:\n\n* Return follow-up questions.\n\n* Keep each question under 5 words.\n\n* Always return 3 values"
+          "systemPromptTemplate": "=You provide suggested answers to questions you received or follow-up questions in plain text.\n\nRules *IMPORTANT*:\n\n* Return suggested answers to questions or follow-up questions.\n\n* Keep each answer or question under 5 words.\n\n* Always return 3 values"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
       "position": [
-        640,
-        304
+        576,
+        240
       ],
-      "id": "55afad45-846d-4568-b40e-a0cdf3bb4b04",
+      "id": "b05feae3-43dd-42be-8d51-64772fa98acf",
       "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9378efb7-a48a-41fa-895d-4dce3eb035cf",
+              "name": "message",
+              "value": "={{ typeof $json.output === \"string\" ? $json.output : JSON.stringify($json.output) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        16
+      ],
+      "id": "259a277e-7e1c-4774-8aa3-8bc902a33648",
+      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -162,10 +165,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1216,
-        160
+        1168,
+        176
       ],
-      "id": "6f754eed-62bf-43f9-b84b-e4bb527ed51f",
+      "id": "019f7d68-afb9-481c-8016-1886004df85a",
       "name": "Edit Fields1",
       "executeOnce": true
     },
@@ -178,34 +181,11 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        992,
-        160
+        880,
+        112
       ],
-      "id": "5c67d3ac-2d74-47af-80c4-e679aa2b1fd6",
+      "id": "acaea5dc-3aa7-4927-88da-360e70e20b64",
       "name": "Merge"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "9378efb7-a48a-41fa-895d-4dce3eb035cf",
-              "name": "message",
-              "value": "={{ typeof $json.output === \"string\" ? $json.output : JSON.stringify($json.output) }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        704,
-        0
-      ],
-      "id": "f07ffb2f-127c-4066-a4c9-985f92b33944",
-      "name": "Edit Fields2"
     }
   ],
   "pinData": {},
@@ -214,7 +194,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields2",
+            "node": "Edit Fields",
             "type": "main",
             "index": 0
           },
@@ -259,23 +239,23 @@
         ]
       ]
     },
-    "Context 7": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Google Gemini Chat Model2": {
       "ai_languageModel": [
         [
           {
             "node": "Information Extractor",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
             "index": 0
           }
         ]
@@ -292,22 +272,16 @@
         ]
       ]
     },
+    "Edit Fields1": {
+      "main": [
+        []
+      ]
+    },
     "Merge": {
       "main": [
         [
           {
             "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields2": {
-      "main": [
-        [
-          {
-            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -319,12 +293,12 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4c69d3de-f7be-41ca-9cee-c793714ad0c8",
+  "versionId": "f80fc477-7fd5-4e74-800c-f251fd52c67f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
   },
-  "id": "zAT0osRYSwA3pecM",
+  "id": "EZXeZj82dK86zbeo",
   "tags": [
     {
       "createdAt": "2025-08-22T15:55:34.834Z",

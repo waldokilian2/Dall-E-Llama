@@ -1,0 +1,443 @@
+{
+  "name": "URL Critic",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are an expert panel consisting of:\n\nSenior Web Accessibility Specialist (WCAG compliance)\n\nSenior UX Designer (navigation, layout, usability)\n\nSEO Strategist (metadata, headings, indexing readiness)\n\nContent Strategist (clarity, conciseness, audience fit)\n\nBrand/Copy Reviewer (tone, grammar, brand consistency)\n\nCompliance Auditor (privacy, copyright, legal standards)\n\nTask: Describe to the user that you analyze websites before you ask the user for a URL. Given the scraped HTML/text of a website (Use the \"Scrape Webiste\" tool to get this data), produce a structured, objective analysis with findings and actionable recommendations. Base evaluations on verifiable standards (e.g., WCAG, Google SEO guidelines, Nielsen Norman Group). Avoid personal taste. If uncertain, mark as “Unable to Assess.” Include examples from the content to justify findings.\n* If the user provides a URL that is missing the https:// prefix, add it yourself\nFormat the output so it will display nicely in a chat window:\n\n# Website Expert Analysis Report\n\n## 1. Accessibility (WCAG Compliance)\n- Issues Found:\n - [Issue] (Reference: WCAG criterion)\n- Recommendations:\n - [Fix]\n\n## 2. UX Design\n- Issues Found:\n - [Problem + evidence]\n- Recommendations:\n - [Fix]\n\n## 3. SEO\n- Issues Found:\n - [Problem + standard reference]\n- Recommendations:\n - [Fix]\n\n## 4. Content Quality\n- Issues Found:\n - [Problem]\n- Recommendations:\n - [Fix]\n\n## 5. Brand & Copy\n- Issues Found:\n - [Problem]\n- Recommendations:\n - [Fix]\n\n## 6. Compliance\n- Issues Found:\n - [Problem]\n- Recommendations:\n - [Fix]\n\n## 7. Summary Prioritization\n- High Priority:\n - [Critical issues]\n- Medium Priority:\n - [Significant but non-blocking]\n- Low Priority:\n - [Minor improvements]\n\n* Output should always be easily readable with a newline after every heading."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        592
+      ],
+      "id": "60d2f11c-fe3c-4e4a-b247-e7193be6cad9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        816
+      ],
+      "id": "3a0499e5-80e4-455d-9f09-51c7feeeafb4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ok9Oid7izeTFUqEY",
+          "name": "Hackathon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "This tool allows the user to analyse any website by just providing the URL. The user will then receive detailed feedback on any UI changes that should be considered."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "61fcf6a5-85f3-4e41-a2a4-b47301fcfe2e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        592
+      ],
+      "id": "e5b5ac3d-cbf6-4ee3-89e8-fb25bf878f26",
+      "name": "When chat message received",
+      "webhookId": "8e8c189a-5a06-4651-bb44-ed7bb464d290"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.URL }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "4249736d-089c-4968-a516-fba337ff22e5",
+      "name": "Scrape Website"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        816
+      ],
+      "id": "10b8cb81-1ce3-44c8-8b83-88afb265ab9a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "URL"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -224
+      ],
+      "id": "b32eb396-23ac-4593-ace9-78aacc12c87d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "path": "scrape"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "657711d9-0ae1-4df2-9c61-e63e2a3a9133",
+      "name": "Scrape",
+      "webhookId": "4625bcf4-0dd9-4562-a70f-6fee41f6f12d"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/scrape/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        816
+      ],
+      "id": "4ef94ee1-e626-4361-aa23-26943932b51e",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "name": "Scrape_Website",
+        "description": "Gets the contents of a website for further analysis",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `URL provided by the user in the form of https://www.example.com`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        224
+      ],
+      "id": "4228d7c4-dfaa-482b-ac7e-bfa82c8741a8",
+      "name": "Scrape Website Tool"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite-preview-06-17",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        768,
+        960
+      ],
+      "id": "47b2d984-d350-4e54-a697-5ec535d58399",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ok9Oid7izeTFUqEY",
+          "name": "Hackathon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"suggestedActions\": [\n    \"action 1\",\n    \"action 2\",\n    \"action 3\"\n  ]\n}",
+        "options": {
+          "systemPromptTemplate": "=You provide follow-up questions in plain text.\n\nRules *IMPORTANT*:\n\n* Return follow-up questions.\n\n* Keep each question under 5 words.\n\n* Always return 3 values"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        736
+      ],
+      "id": "a3160910-078f-404e-8683-45f4466f1854",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9378efb7-a48a-41fa-895d-4dce3eb035cf",
+              "name": "message",
+              "value": "={{ typeof $json.output === \"string\" ? $json.output : JSON.stringify($json.output) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        432
+      ],
+      "id": "9fe64253-20eb-4d69-bbff-1d22a83dfada",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c8e845f0-9630-4ed8-b1b1-f553e507c173",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "5fbb58a5-08d2-4e6f-916e-44ad285b9a10",
+              "name": "suggestedActions",
+              "value": "={{ $json.output.suggestedActions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        592
+      ],
+      "id": "89a9fcc6-2bc0-4159-adef-712ad6475dd6",
+      "name": "Edit Fields1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1040,
+        592
+      ],
+      "id": "1d0e985c-99d2-4d11-b9dc-91f2b2783ff8",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Website": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Scrape Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Website Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Scrape",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a868d0b-36ea-4af1-b386-dc9a83c0da0a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
+  },
+  "id": "jsQQdfpHtxMCFgSa",
+  "tags": [
+    {
+      "createdAt": "2025-08-22T15:55:34.834Z",
+      "updatedAt": "2025-08-22T15:55:34.834Z",
+      "id": "uMQCO2ABi1t5BlTH",
+      "name": "HACK"
+    }
+  ]
+}

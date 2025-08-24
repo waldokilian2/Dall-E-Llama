@@ -1,0 +1,155 @@
+{
+  "name": "DevToolsMCP",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "devtools"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        16
+      ],
+      "id": "ecb55c24-f84c-444d-8a05-3242cb3e8d4f",
+      "name": "DevToolsMCP",
+      "webhookId": "73935c8c-bf98-45a3-9abb-72b00d2edb30"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@upstash/context7-mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "serverTransport": "httpStreamable",
+        "include": "selected",
+        "includeTools": [
+          "resolve-library-id",
+          "get-library-docs"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        208
+      ],
+      "id": "4bdeb303-d7bb-4d3d-98ab-4f4d6ec661c7",
+      "name": "Context 7"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@hugeicons/mcp-server/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "serverTransport": "httpStreamable",
+        "include": "selected"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        208
+      ],
+      "id": "1a723f85-3aaf-41f8-9d8f-c8211580287d",
+      "name": "Hugeicons"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@GongRzhe/terminal-controller-mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "serverTransport": "httpStreamable",
+        "include": "selected",
+        "includeTools": [
+          "execute_command",
+          "get_command_history",
+          "get_current_directory",
+          "change_directory",
+          "list_directory",
+          "write_file",
+          "read_file",
+          "insert_file_content",
+          "delete_file_content",
+          "update_file_content"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        208
+      ],
+      "id": "b8642740-86b9-47d8-b1cc-bc0a8b58396a",
+      "name": "Terminal commands"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@docfork/mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "serverTransport": "httpStreamable",
+        "include": "selected",
+        "includeTools": [
+          "get-library-docs"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        208
+      ],
+      "id": "0b657ba2-a207-4160-b18e-401a3ccf898e",
+      "name": "LibraryDocs"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Context 7": {
+      "ai_tool": [
+        [
+          {
+            "node": "DevToolsMCP",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hugeicons": {
+      "ai_tool": [
+        [
+          {
+            "node": "DevToolsMCP",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Terminal commands": {
+      "ai_tool": [
+        [
+          {
+            "node": "DevToolsMCP",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LibraryDocs": {
+      "ai_tool": [
+        [
+          {
+            "node": "DevToolsMCP",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6e430808-a3d6-4122-ae01-5b13af85f2ff",
+  "meta": {
+    "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
+  },
+  "id": "IzeS1WJ09c8rPr98",
+  "tags": []
+}

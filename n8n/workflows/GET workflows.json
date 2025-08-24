@@ -1,0 +1,166 @@
+{
+  "name": "GET workflows",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "workflows",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryPropertyName": "data",
+          "ignoreBots": false,
+          "ipWhitelist": "",
+          "rawBody": false,
+          "responseHeaders": {
+            "values": []
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        0,
+        0
+      ],
+      "name": "Webhook Trigger",
+      "id": "generated-1ce3ad82-7812-4160-834c-fe0b409cdb20",
+      "webhookId": "4960608c-9961-466a-bc5e-838b49b17cc2"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook Workflow to Retrieve 'HACK' Tagged Workflows\n\nThis workflow sets up a webhook that, when triggered, fetches all n8n workflows tagged with 'HACK' and responds with the retrieved workflow data in JSON format.\n\n### Nodes:\n- **Webhook Trigger**: Initiates the workflow upon receiving an HTTP GET request to the specified path '/workflows'.\n- **Get HACK Workflows**: Connects to your n8n instance to retrieve all workflows that have the tag 'HACK'.\n- **Respond with Workflows**: Sends the JSON data of the retrieved workflows back as the webhook's response.\n",
+        "height": 300,
+        "width": 700
+      },
+      "position": [
+        16,
+        -320
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "name": "Workflow Description",
+      "id": "generated-9a4786b2-fd8c-47fd-a819-e6db03e677ad"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "821226b0-12ad-4d1d-81c3-dfa3c286cce4",
+              "name": "id",
+              "type": "string",
+              "value": "=http://localhost:5678/webhook/{{\n$json.nodes.find(node => node.type === '@n8n/n8n-nodes-langchain.chatTrigger').webhookId || ''\n}}/chat"
+            },
+            {
+              "id": "629d95d6-2501-4ad4-a5ed-e557237e1cc2",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "id": "30699f7c-98d3-44ee-9749-c5528579f7e6",
+              "name": "description",
+              "type": "string",
+              "value": "={{\n $json.nodes.find(node => node.type === 'n8n-nodes-base.stickyNote')?.parameters?.content || ''\n}}\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        0
+      ],
+      "id": "7329270b-b91e-4a2d-921e-212b83339732",
+      "name": "Simplify Workflows4"
+    },
+    {
+      "parameters": {
+        "filters": {
+          "tags": "HACK"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        256,
+        48
+      ],
+      "id": "23e57688-dcc0-4c51-984a-4eaa2fe489cb",
+      "name": "Get many workflows",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "n8nApi": {
+          "id": "O8J2KXnOrVoFHpEo",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        176
+      ],
+      "id": "f127a5a3-d9bd-450d-892e-15b839ac0c91",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simplify Workflows4": {
+      "main": [
+        []
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Simplify Workflows4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "12f7f547-d2b6-4d73-b45e-7a83a8c95026",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
+  },
+  "id": "UpmfSOJ8g9SvPFol",
+  "tags": []
+}
