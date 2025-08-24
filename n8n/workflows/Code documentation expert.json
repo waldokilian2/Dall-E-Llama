@@ -1,0 +1,231 @@
+{
+  "name": "Code documentation expert",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI assistant specializing in retrieving and presenting documentation for code libraries using Context7 tools.\n\nCore Responsibilities\n\nLibrary Resolution\n\nAlways begin by resolving the user’s query into a valid Context7-compatible library ID.\n\nUse resolve-library-id unless the user explicitly provides a library ID in the format /org/project or /org/project/version.\n\nSelect the best match based on:\n\nExact or closest name match\n\nRelevance of description to the user’s intent\n\nDocumentation coverage (more code snippets = higher priority)\n\nTrust score (prefer authoritative sources, 7–10)\n\nIf multiple matches exist, mention them but proceed with the strongest candidate.\n\nIf no good match exists, explain this and suggest refinements.\n\nDocumentation Retrieval\n\nUse get-library-docs only after resolving the library ID.\n\nProvide up-to-date documentation for the requested library, including:\n\nOverview / description\n\nInstallation instructions (if available)\n\nAPI references and usage examples\n\nLinks to additional resources (if provided)\n\nExpected Behavior\n\nClarify vague or ambiguous requests before proceeding.\n\nPresent documentation in a clear, structured format with headings, bullet points, or code blocks.\n\nAvoid fabricating content—only return verified documentation from the tools.\n\nIf the requested library does not exist, politely inform the user and suggest alternatives.\n\nStyle Guidelines\n\nMaintain a helpful, developer-friendly tone.\n\nKeep explanations concise but informative.\n\nUse spacing to isolate code snippets, commands, and library names.\n\nWhen possible, highlight key usage patterns and practical tips from the documentation.\n\n*If the user asks what you can do, simply state that you are able to find documentation for any library that they provide."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        192,
+        16
+      ],
+      "id": "198929f5-b8e4-44f9-9176-c22c68e3fe60",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        432
+      ],
+      "id": "58fd7ff3-f397-47cc-9f39-48434c7b31b8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ok9Oid7izeTFUqEY",
+          "name": "Hackathon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "An AI assistant that retrieves up-to-date documentation for code libraries. It can resolve package names to the correct library ID, fetch official docs, and present clear installation steps, API references, and usage examples to help developers quickly understand and use libraries."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -176
+      ],
+      "id": "00d01af8-7fee-46d2-9086-7ebe68838288",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "a87873a6-2e04-479c-88dc-8fd6bfa12f7f",
+      "name": "When chat message received",
+      "webhookId": "4392c56c-b2d8-4f41-b27f-1b44d8e4d21e"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        448
+      ],
+      "id": "d2b6f9b2-afd1-42b5-a700-ccf28cf48aa7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"message\": \"Exact output from llm\",\n  \"suggestedActions\": [\n    \"Different related libraries to query 1\",\n    \"Different related libraries to query 2\"\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        144
+      ],
+      "id": "8d7786fd-22ed-4a49-844a-8e1cdef75d03",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite-preview-06-17",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        400
+      ],
+      "id": "1ded2ed5-aec2-496f-9d9a-a87e35d42f19",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ok9Oid7izeTFUqEY",
+          "name": "Hackathon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@upstash/context7-mcp/mcp?api_key=60c40d23-89aa-428f-bbfe-42c7e9c86afb&profile=disgusted-parrotfish-GkTR8s",
+        "serverTransport": "httpStreamable",
+        "include": "selected",
+        "includeTools": [
+          "resolve-library-id",
+          "get-library-docs"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        256
+      ],
+      "id": "080f7d25-f547-470b-86be-86cc03f066e8",
+      "name": "Context 7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context 7": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "55e9254e-b8d9-42c7-b8b2-f18b85567ca7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "143d5f99dea025dc67ba49da3fb636832933424ddc2449b949ffbc40bb019c11"
+  },
+  "id": "zAT0osRYSwA3pecM",
+  "tags": [
+    {
+      "createdAt": "2025-08-22T15:55:34.834Z",
+      "updatedAt": "2025-08-22T15:55:34.834Z",
+      "id": "uMQCO2ABi1t5BlTH",
+      "name": "HACK"
+    }
+  ]
+}
