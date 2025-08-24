@@ -41,7 +41,7 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           isUser ? "border-blue-500/50" : "border-gray-600/50"
         } ${messageClasses}`}
       >
-        <div className="prose prose-invert max-w-none"> {/* Apply prose styles here */}
+        <div className="prose prose-invert"> {/* Removed max-w-none to allow proper wrapping */}
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
