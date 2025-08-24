@@ -35,13 +35,13 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
   };
 
   return (
-    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}> {/* Added w-full here */}
+    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`group relative max-w-[70%] p-3 rounded-lg shadow-md border ${
           isUser ? "border-blue-500/50" : "border-gray-600/50"
         } ${messageClasses}`}
       >
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-invert max-w-none break-words"> {/* Added break-words to force long words to wrap */}
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
