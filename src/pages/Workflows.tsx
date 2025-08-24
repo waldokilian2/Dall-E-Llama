@@ -10,6 +10,8 @@ import WorkflowSettingsDialog from "@/components/WorkflowSettingsDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import llamaLogo from "@/assets/llama.png";
+import ReactMarkdown from "react-markdown"; // Import ReactMarkdown
+import remarkGfm from "remark-gfm"; // Import remarkGfm for GitHub Flavored Markdown
 
 interface Workflow {
   id: string;
@@ -145,7 +147,11 @@ const Workflows: React.FC = () => {
                 <CardTitle className="text-purple-700 dark:text-purple-300">{workflow.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
-                <p>{workflow.description}</p>
+                <div className="prose dark:prose-invert prose-sm max-w-none"> {/* Added prose classes for markdown styling */}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {workflow.description}
+                  </ReactMarkdown>
+                </div>
               </CardContent>
             </Card>
           ))}
