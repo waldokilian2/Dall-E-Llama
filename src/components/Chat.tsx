@@ -152,31 +152,16 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       let aiMessageText = "No response from AI.";
       let newSuggestedActions: string[] = ["What can you do?"];
 
-      if (rawData && typeof rawData === 'object' && rawData.output) {
-        const output = rawData.output;
-        if (output.message) {
-          aiMessageText = output.message;
+      // --- START: Updated parsing logic ---
+      if (rawData && typeof rawData === 'object') {
+        if (typeof rawData.output === 'string') {
+          aiMessageText = rawData.output;
         }
-        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
-          newSuggestedActions = output.suggestedActions;
-        }
-      } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
-        const output = rawData[0].output;
-        if (output.message) {
-          aiMessageText = output.message;
-        }
-        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
-          newSuggestedActions = output.suggestedActions;
-        }
-      } else {
-        console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
-        if (rawData?.message) {
-            aiMessageText = rawData.message;
-        }
-        if (Array.isArray(rawData?.suggestedActions) && rawData.suggestedActions.length > 0) {
-            newSuggestedActions = rawData.suggestedActions;
+        if (Array.isArray(rawData.suggestedActions) && rawData.suggestedActions.length > 0) {
+          newSuggestedActions = rawData.suggestedActions;
         }
       }
+      // --- END: Updated parsing logic ---
 
       const aiMessage: ChatMessage = { sender: "ai", text: aiMessageText };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
