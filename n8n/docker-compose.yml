@@ -1,0 +1,18 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    # network_mode: host - might be needed for some setups i.e ollama
+    restart: always
+    ports:
+      - 5678:5678
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://localhost:5678
+      - GENERIC_TIMEZONE=Africa/Johannesburg
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
