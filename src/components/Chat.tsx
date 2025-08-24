@@ -42,7 +42,6 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
   const [sessionId, setSessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
-  // Initialize with "What can you do?" for the first message
   const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
 
   const scrollToBottom = () => {
@@ -88,7 +87,6 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
     let fileName: string | undefined = undefined;
     let fileType: string | undefined = undefined;
 
-    // Clear suggested actions when a message is sent
     setCurrentSuggestedActions([]);
 
     if (selectedFile) {
@@ -104,7 +102,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
         reader.onerror = () => {
           showError("Failed to read text file.");
           setIsLoading(false);
-          setCurrentSuggestedActions(["What can you do?"]); // Re-show default if error
+          setCurrentSuggestedActions(["What can you do?"]);
         };
         reader.readAsText(selectedFile);
         return;
@@ -152,12 +150,16 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       console.log("Webhook raw response data:", rawData);
 
       let aiMessageText = "No response from AI.";
-      let newSuggestedActions: string[] = []; // Default to empty array
+      let newSuggestedActions: string[] = [];
 
       if (rawData && typeof rawData === 'object') {
+        // Prioritize 'output', then check for 'message'
         if (typeof rawData.output === 'string') {
           aiMessageText = rawData.output;
+        } else if (typeof rawData.message === 'string') {
+          aiMessageText = rawData.message;
         }
+        
         if (Array.isArray(rawData.suggestedActions) && rawData.suggestedActions.length > 0) {
           newSuggestedActions = rawData.suggestedActions;
         }
@@ -165,7 +167,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
       const aiMessage: ChatMessage = { sender: "ai", text: aiMessageText };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-      setCurrentSuggestedActions(newSuggestedActions); // Set to webhook suggestions or empty
+      setCurrentSuggestedActions(newSuggestedActions);
 
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -184,7 +186,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
           { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
         ]);
       }
-      setCurrentSuggestedActions(["What can you do?"]); // Re-show default if error
+      setCurrentSuggestedActions(["What can you do?"]);
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +211,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       fileInputRef.current.value = "";
     }
     setSessionId(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
-    setCurrentSuggestedActions(["What can you do?"]); // Reset to default for new chat
+    setCurrentSuggestedActions(["What can you do?"]);
     setIsLoading(false);
   }, []);
 
@@ -225,7 +227,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
-          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" /> {/* Llama logo, increased size */}
+          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" />
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
