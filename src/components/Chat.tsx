@@ -42,6 +42,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
   const [sessionId, setSessionId] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
+  // Initialize with "What can you do?" for the first message
   const [currentSuggestedActions, setCurrentSuggestedActions] = useState<string[]>(["What can you do?"]);
 
   const scrollToBottom = () => {
@@ -87,6 +88,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
     let fileName: string | undefined = undefined;
     let fileType: string | undefined = undefined;
 
+    // Clear suggested actions when a message is sent
     setCurrentSuggestedActions([]);
 
     if (selectedFile) {
@@ -102,7 +104,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
         reader.onerror = () => {
           showError("Failed to read text file.");
           setIsLoading(false);
-          setCurrentSuggestedActions(["What can you do?"]);
+          setCurrentSuggestedActions(["What can you do?"]); // Re-show default if error
         };
         reader.readAsText(selectedFile);
         return;
@@ -150,9 +152,8 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       console.log("Webhook raw response data:", rawData);
 
       let aiMessageText = "No response from AI.";
-      let newSuggestedActions: string[] = ["What can you do?"];
+      let newSuggestedActions: string[] = []; // Default to empty array
 
-      // --- START: Updated parsing logic ---
       if (rawData && typeof rawData === 'object') {
         if (typeof rawData.output === 'string') {
           aiMessageText = rawData.output;
@@ -161,11 +162,10 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
           newSuggestedActions = rawData.suggestedActions;
         }
       }
-      // --- END: Updated parsing logic ---
 
       const aiMessage: ChatMessage = { sender: "ai", text: aiMessageText };
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-      setCurrentSuggestedActions(newSuggestedActions);
+      setCurrentSuggestedActions(newSuggestedActions); // Set to webhook suggestions or empty
 
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -184,7 +184,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
           { sender: "ai", text: "Sorry, I couldn't connect to the AI agent." },
         ]);
       }
-      setCurrentSuggestedActions(["What can you do?"]);
+      setCurrentSuggestedActions(["What can you do?"]); // Re-show default if error
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +209,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       fileInputRef.current.value = "";
     }
     setSessionId(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
-    setCurrentSuggestedActions(["What can you do?"]);
+    setCurrentSuggestedActions(["What can you do?"]); // Reset to default for new chat
     setIsLoading(false);
   }, []);
 
