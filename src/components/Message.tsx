@@ -41,12 +41,28 @@ const Message: React.FC<MessageProps> = ({ sender, text }) => {
           isUser ? "border-blue-500/50" : "border-gray-600/50"
         } ${messageClasses}`}
       >
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-invert break-words whitespace-pre-wrap">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            // components={{
+            //   a: ({ node, ...props }) => (
+            //     <a {...props} className="text-purple-400 hover:underline break-words" target="_blank" rel="noopener noreferrer" />
+            //   ),
+            // }}
             components={{
+              pre: ({ node, ...props }) => (
+                <pre {...props} className="whitespace-pre-wrap break-words" />
+              ),
+              code: ({ node, ...props }) => (
+                <code {...props} className="whitespace-pre-wrap break-words" />
+              ),
               a: ({ node, ...props }) => (
-                <a {...props} className="text-purple-400 hover:underline break-words" target="_blank" rel="noopener noreferrer" />
+                <a
+                  {...props}
+                  className="text-purple-400 hover:underline break-words"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
               ),
             }}
           >
