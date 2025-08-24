@@ -150,18 +150,31 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
       console.log("Webhook raw response data:", rawData);
 
       let aiMessageText = "No response from AI.";
-      let newSuggestedActions: string[] = [];
+      let newSuggestedActions: string[] = ["What can you do?"];
 
-      if (rawData && typeof rawData === 'object') {
-        // Prioritize 'output', then check for 'message'
-        if (typeof rawData.output === 'string') {
-          aiMessageText = rawData.output;
-        } else if (typeof rawData.message === 'string') {
-          aiMessageText = rawData.message;
+      if (rawData && typeof rawData === 'object' && rawData.output) {
+        const output = rawData.output;
+        if (output.message) {
+          aiMessageText = output.message;
         }
-        
-        if (Array.isArray(rawData.suggestedActions) && rawData.suggestedActions.length > 0) {
-          newSuggestedActions = rawData.suggestedActions;
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
+        }
+      } else if (Array.isArray(rawData) && rawData.length > 0 && rawData[0]?.output) {
+        const output = rawData[0].output;
+        if (output.message) {
+          aiMessageText = output.message;
+        }
+        if (Array.isArray(output.suggestedActions) && output.suggestedActions.length > 0) {
+          newSuggestedActions = output.suggestedActions;
+        }
+      } else {
+        console.warn("Unexpected AI response format, falling back to direct properties:", rawData);
+        if (rawData?.message) {
+            aiMessageText = rawData.message;
+        }
+        if (Array.isArray(rawData?.suggestedActions) && rawData.suggestedActions.length > 0) {
+            newSuggestedActions = rawData.suggestedActions;
         }
       }
 
@@ -227,7 +240,7 @@ const Chat: React.FC<ChatProps> = ({ n8nWebhookUrl }) => {
 
         {/* Centered Title and Icon */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2">
-          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" />
+          <img src={llamaLogo} alt="Dall-E Llama Logo" className="h-12 w-12" /> {/* Llama logo, increased size */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
             Dall-E Llama
           </h1>
